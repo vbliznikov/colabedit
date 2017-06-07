@@ -3,7 +3,7 @@ This is proof of concept solution for collaboraive file editing.
 
 ## Features
 ### 1. Users Authentication. 
-Only authenticated users allowed to work with app. Oauth with Google (Github?) will be supported as a primary auth method.
+Only authenticated users allowed to work with app. ~Oauth with Google (Github?) will be supported as a primary auth method~. Builtin auth for the first version would be preferable to simplify testing and demo.
 ### 2. Files listing. 
 Allows users to view files in designated server folder, pick one for view/edit or create a new one. 
 For simplicity there will be flat file structure without folders, which might be added in the future.
