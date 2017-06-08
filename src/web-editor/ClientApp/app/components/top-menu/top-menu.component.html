@@ -1,0 +1,35 @@
+<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="#">Collaborative Editor</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse navbar-ex1-collapse">
+        <ul class='nav navbar-nav'>
+            <li [routerLinkActive]="['link-active']" *ngFor="let link of links">
+                <a [routerLink]="[link.path]">
+                        <span class='glyphicon {{link.class}}'></span> {{link.title}}
+                    </a>
+            </li>
+            <!-- Scaffolding Links-->
+            <li [routerLinkActive]="['link-active']">
+                <a [routerLink]="['/file-editor']">
+                        <span class='glyphicon glyphicon-folder-open'></span> Server Explorer
+                    </a>
+            </li>
+        </ul>
+        <!-- Scaffolding Links-->
+        <ul class="nav navbar-nav navbar-right">
+            <li><a href="#">Login</a></li>
+            <li><a href="#">Sign-up</a></li>
+        </ul>
+    </div>
+    <!-- /.navbar-collapse -->
+</nav>
