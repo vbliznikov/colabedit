@@ -1,0 +1,11 @@
+.explorer-menu {
+    position: fixed;
+    width: 25%;
+    height: 100%
+}
+
+.explorer-content {
+    margin-left: 25%;
+    padding-left: 25px;
+    width: 75%;
+}

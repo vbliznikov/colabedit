@@ -6,6 +6,7 @@ import { UniversalModule } from 'angular2-universal';
 
 
 import { AppComponent, HomeComponent, NotFoundComponent, TopMenuComponent } from './components'
+import { ExplorerHomeComponent, FileEditorComponent, FileExplorerComponent } from './components/explorer';
 import { FetchDataComponent } from './components/fetchdata/fetchdata.component';
 import { CounterComponent } from './components/counter/counter.component';
 
@@ -14,10 +15,13 @@ import { CounterComponent } from './components/counter/counter.component';
     declarations: [
         AppComponent,
         NotFoundComponent,
+        HomeComponent,
         TopMenuComponent,
+        ExplorerHomeComponent,
+        FileEditorComponent,
+        FileExplorerComponent,
         CounterComponent,
-        FetchDataComponent,
-        HomeComponent
+        FetchDataComponent
     ],
     imports: [
         UniversalModule, // Must be first import. This automatically imports BrowserModule, HttpModule, and JsonpModule too.
@@ -27,6 +31,14 @@ import { CounterComponent } from './components/counter/counter.component';
             { path: 'home', component: HomeComponent, data: { title: "Home", icon: 'glyphicon-home' } },
             { path: 'counter', component: CounterComponent, data: { title: "Counter", icon: 'glyphicon-education' } },
             { path: 'fetch-data', component: FetchDataComponent, data: { title: "Fetch Data", icon: 'glyphicon-th-list' } },
+            {
+                path: 'explorer', component: ExplorerHomeComponent,
+                children:
+                [
+                    { path: '', component: FileExplorerComponent, outlet: 'left-nav' },
+                    { path: '', component: FileEditorComponent }
+                ]
+            },
             { path: '**', component: NotFoundComponent }
         ])
     ]
