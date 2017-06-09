@@ -1,5 +1,5 @@
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 
 @Component({
     selector: 'file-explorer',
@@ -8,7 +8,10 @@ import { Component, OnInit } from '@angular/core';
 })
 
 export class FileExplorerComponent implements OnInit {
+    @Input() public path: string;
     constructor() { }
 
-    ngOnInit() { }
+    ngOnInit() {
+
+    }
 }
