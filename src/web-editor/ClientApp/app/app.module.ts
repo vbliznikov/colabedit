@@ -32,12 +32,11 @@ import { CounterComponent } from './components/counter/counter.component';
             { path: 'counter', component: CounterComponent, data: { title: "Counter", icon: 'glyphicon-education' } },
             { path: 'fetch-data', component: FetchDataComponent, data: { title: "Fetch Data", icon: 'glyphicon-th-list' } },
             {
-                path: 'explorer', component: ExplorerHomeComponent, pathMatch: 'prefix'
-                // children:
-                // [
-                //     { path: '', component: FileExplorerComponent, outlet: 'left-nav' },
-                //     { path: '', component: FileEditorComponent }
-                // ]
+                path: 'explorer',
+                children:
+                [
+                    { path: '**', component: ExplorerHomeComponent }
+                ]
             },
             { path: '**', component: NotFoundComponent }
         ])
