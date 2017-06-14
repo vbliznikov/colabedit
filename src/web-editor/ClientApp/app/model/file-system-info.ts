@@ -1,6 +1,5 @@
 
 export class FileSystemInfo {
-    parent: FileSystemInfo;
     name: string;
     path: PathInfo;
     isFile: boolean;
@@ -11,6 +10,12 @@ export class FileSystemInfo {
         this.path = path;
         this.isFile = isFile;
         this.name = path.parts[path.parts.length - 1];
+    }
+
+    get parent(): FileSystemInfo {
+        if (!this.path.hasParent) return null;
+
+        return new FileSystemInfo(this.path.parentPath, false);
     }
 
     toString() {
@@ -33,6 +38,14 @@ export class PathInfo {
 
     concat(path: string) {
         return new PathInfo(this.parts.concat(path));
+    }
+
+    get hasParent() {
+        return this.parts.length > 1;
+    }
+
+    get parentPath(): PathInfo {
+        return new PathInfo(this.parts.slice(0, this.parts.length - 1))
     }
 
     static get default(): PathInfo {
