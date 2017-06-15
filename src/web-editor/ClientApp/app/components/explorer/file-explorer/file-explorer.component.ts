@@ -41,11 +41,6 @@ export class FileExplorerComponent implements OnInit, OnChanges {
         else
             folderPath += fsInfo.path.toString();
 
-        const parentFolderInfo = fsInfo.isFile ? fsInfo.parent.parent : fsInfo.parent;
-        if (parentFolderInfo) {
-            items.push(<Link>{ path: `${this.basePath}/${parentFolderInfo.path.toString()}`, title: '..' });
-        }
-
         for (let i = 0; i < 3; i++) {
             const name = `Folder${i}`;
             const path = `${folderPath}/${name}`;
