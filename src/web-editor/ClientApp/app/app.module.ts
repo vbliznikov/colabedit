@@ -6,7 +6,7 @@ import { UniversalModule } from 'angular2-universal';
 
 
 import { AppComponent, HomeComponent, NotFoundComponent, TopMenuComponent } from './components'
-import { ExplorerHomeComponent, FileEditorComponent, FileExplorerComponent } from './components/explorer';
+import { ExplorerHomeComponent, FileEditorComponent, FileExplorerComponent, BreadcrumbsComponent } from './components/explorer';
 import { FetchDataComponent } from './components/fetchdata/fetchdata.component';
 import { CounterComponent } from './components/counter/counter.component';
 
@@ -20,6 +20,7 @@ import { CounterComponent } from './components/counter/counter.component';
         ExplorerHomeComponent,
         FileEditorComponent,
         FileExplorerComponent,
+        BreadcrumbsComponent,
         CounterComponent,
         FetchDataComponent
     ],

@@ -1,6 +1,9 @@
-<div class="explorer-menu">
+<div class="breadcrumbs-pannel">
+    <explorer-breadcrumbs [pathItems]="breadcrumbs"></explorer-breadcrumbs>
+</div>
+<div class="folder-content">
     <file-explorer [fileSystemEntry]="fileSystemEntry$"></file-explorer>
 </div>
-<div class="explorer-content">
+<div class="editor-area">
     <file-editor></file-editor>
 </div>

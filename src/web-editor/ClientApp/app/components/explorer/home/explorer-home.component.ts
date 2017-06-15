@@ -2,7 +2,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
-import { FileSystemInfo, PathInfo } from '../model';
+import { FileSystemInfo, PathInfo, Link } from '../model';
 import { PathMapService } from '../services/path-map.service';
 
 @Component({
@@ -12,13 +12,32 @@ import { PathMapService } from '../services/path-map.service';
 })
 
 export class ExplorerHomeComponent implements OnInit {
-    path: string;
+    readonly basePath = '/explorer';
+    breadcrumbs: Link[] = [];
     private fileSystemEntry$: Observable<FileSystemInfo>;
 
     constructor(private pathMapService: PathMapService) { }
 
     ngOnInit() {
         this.fileSystemEntry$ = this.pathMapService.getFsEntryFromUrl();
-        this.fileSystemEntry$.subscribe((value) => console.log(`Resulting entry='${value}'`));
+        this.fileSystemEntry$.subscribe((value) => {
+            console.log(`Resulting entry='${value}'`);
+            this.breadcrumbs = this.getBreadCrumbs(value);
+        });
+    }
+
+    public getBreadCrumbs(fsInfo: FileSystemInfo): Link[] {
+        console.log(`'ExplorerHome:' getBreadCrumbs()`);
+        const breabcrumbs: Link[] = [];
+        let path = this.basePath;
+        const lastFolderPath = fsInfo.isFile ? fsInfo.parent.path.parts : fsInfo.path.parts
+
+        for (let pathPart of lastFolderPath) {
+            path += `/${pathPart}`;
+            const link: Link = { path: path, title: pathPart };
+            breabcrumbs.push(link);
+        }
+
+        return breabcrumbs;
     }
 }

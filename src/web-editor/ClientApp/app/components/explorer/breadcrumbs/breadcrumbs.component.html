@@ -1,0 +1,8 @@
+<div id="breadcumbs-pannel">
+    <ol class="breadcrumb">
+        <li *ngFor="let item of pathItems; let isLast = last" [ngClass]="{'active': isLast}">
+            <a *ngIf="!isLast" [routerLink]="item.path">{{item.title}}</a>
+            <span *ngIf="isLast">{{item.title}}</span>
+        </li>
+    </ol>
+</div>

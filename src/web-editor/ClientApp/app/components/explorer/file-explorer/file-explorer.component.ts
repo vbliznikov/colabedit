@@ -11,12 +11,10 @@ import { Link, FileSystemInfo } from '../model';
 })
 
 export class FileExplorerComponent implements OnInit, OnChanges {
-    @Input() public path;
     @Input() fileSystemEntry: Observable<FileSystemInfo>;
 
     readonly basePath = '/explorer';
     private currentEntry: FileSystemInfo;
-    public breabcrumbs: Link[] = [];
     public folderContent: Link[] = [];
     constructor() { }
 
@@ -28,26 +26,9 @@ export class FileExplorerComponent implements OnInit, OnChanges {
         if (!this.fileSystemEntry) return;
         this.fileSystemEntry.subscribe(value => {
             this.currentEntry = value;
-
-            this.breabcrumbs = this.getBreadCrumbs(value);
             this.folderContent = this.getfolderContent(value);
 
         });
-    }
-
-    public getBreadCrumbs(fsInfo: FileSystemInfo): Link[] {
-        console.log('getBreadCrumbs()');
-        const breabcrumbs: Link[] = [];
-        let path = this.basePath;
-        const lastFolderPath = fsInfo.isFile ? fsInfo.parent.path.parts : fsInfo.path.parts
-
-        for (let pathPart of lastFolderPath) {
-            path += `/${pathPart}`;
-            const link: Link = { path: path, title: pathPart };
-            breabcrumbs.push(link);
-        }
-
-        return breabcrumbs;
     }
 
     public getfolderContent(fsInfo: FileSystemInfo): Link[] {
@@ -59,6 +40,11 @@ export class FileExplorerComponent implements OnInit, OnChanges {
             folderPath += fsInfo.parent.path.toString();
         else
             folderPath += fsInfo.path.toString();
+
+        const parentFolderInfo = fsInfo.isFile ? fsInfo.parent.parent : fsInfo.parent;
+        if (parentFolderInfo) {
+            items.push(<Link>{ path: `${this.basePath}/${parentFolderInfo.path.toString()}`, title: '..' });
+        }
 
         for (let i = 0; i < 3; i++) {
             const name = `Folder${i}`;

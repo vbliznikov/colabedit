@@ -1,12 +1,4 @@
 <div class="panel panel-default explorer">
-    <div class="pannel-heading">
-        <ol class="breadcrumb">
-            <li *ngFor="let item of breabcrumbs; let isLast = last" [ngClass]="{'active': isLast}">
-                <a *ngIf="!isLast" [routerLink]="item.path">{{item.title}}</a>
-                <span *ngIf="isLast">{{item.title}}</span>
-            </li>
-        </ol>
-    </div>
     <div class="panel-body">
         <div class="navbar">
             <ul class="nav">
