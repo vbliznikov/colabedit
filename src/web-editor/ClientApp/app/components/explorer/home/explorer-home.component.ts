@@ -2,7 +2,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
-import { FileSystemInfo, PathInfo } from '../../../model';
+import { FileSystemInfo, PathInfo } from '../model';
 import { PathMapService } from '../services/path-map.service';
 
 @Component({

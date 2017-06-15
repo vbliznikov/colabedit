@@ -2,7 +2,7 @@
 import { Component, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
-import { Link, FileSystemInfo } from '../../../model';
+import { Link, FileSystemInfo } from '../model';
 
 @Component({
     selector: 'file-explorer',
