@@ -3,7 +3,7 @@
         <ul class="nav flex-column">
             <li class="nav-item" *ngFor="let item of folderContent">
                 <a class="nav-link" [routerLink]="item.path" [queryParams]="item.query">
-                        <span class="glyphicon" [ngClass]="{'glyphicon-folder-close': !item.query}"></span> {{item.title}}</a>
+                        <span class="fa" [ngClass]="{'fa-file': item.query, 'fa-folder fa-lg': !item.query}"></span> {{item.title}}</a>
             </li>
         </ul>
     </div>
