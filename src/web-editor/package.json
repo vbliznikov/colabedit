@@ -2,6 +2,7 @@
   "name": "collab-editor",
   "version": "0.0.1",
   "scripts": {
+    "update-vendor-bundle": "webpack --config webpack.config.vendor.js",
     "test": "karma start ClientApp/test/karma.conf.js"
   },
   "dependencies": {
@@ -23,7 +24,7 @@
     "aspnet-prerendering": "^2.0.0",
     "aspnet-webpack": "^1.0.17",
     "awesome-typescript-loader": "^3.0.0",
-    "bootstrap": "^3.3.7",
+    "bootstrap": "4.0.0-alpha.6",
     "css": "^2.2.1",
     "css-loader": "^0.25.0",
     "es6-shim": "^0.35.1",
@@ -39,6 +40,7 @@
     "raw-loader": "^0.5.1",
     "rxjs": "^5.0.1",
     "style-loader": "^0.13.1",
+    "tether": "^1.4.0",
     "to-string-loader": "^1.1.5",
     "typescript": "^2.2.1",
     "url-loader": "^0.5.7",

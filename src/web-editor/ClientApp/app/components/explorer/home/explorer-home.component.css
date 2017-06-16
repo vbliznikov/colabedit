@@ -1,3 +1,6 @@
+.explorer-container {
+    margin-top: -15px;
+}
 .folder-content {
     position: fixed;
     width: 250px;
