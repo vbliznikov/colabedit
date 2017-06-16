@@ -1,5 +1,10 @@
 .explorer {
     margin-left: -15px;
-    background-color: #f8f8f8;
+    background-color: #f7f7f7;
     height: 100%;
+}
+
+.content-list {
+    height: calc(100% - 40px);
+    overflow-y: auto;
 }

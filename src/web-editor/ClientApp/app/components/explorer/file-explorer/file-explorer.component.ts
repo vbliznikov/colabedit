@@ -7,7 +7,7 @@ import { Link, FileSystemInfo } from '../model';
 @Component({
     selector: 'file-explorer',
     templateUrl: 'file-explorer.component.html',
-    styleUrls: ['file-explorer.component.css']
+    styleUrls: ['file-explorer.component.css', '../toolbar.css']
 })
 
 export class FileExplorerComponent implements OnInit, OnChanges {
@@ -41,14 +41,14 @@ export class FileExplorerComponent implements OnInit, OnChanges {
         else
             folderPath += fsInfo.path.toString();
 
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < 20; i++) {
             const name = `Folder${i}`;
             const path = `${folderPath}/${name}`;
             const link: Link = { path: `${path}`, title: name };
             items.push(link);
         }
 
-        for (let i = 0; i < 2; i++) {
+        for (let i = 0; i < 10; i++) {
             const name = `file${i}.json`;
             const path = `${folderPath}`;
             const link: Link = { path: `${path}`, title: name, query: { file: name } };
