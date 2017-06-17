@@ -1,6 +1,7 @@
 {
   "name": "collab-editor",
   "version": "0.0.1",
+  "license": "MIT",
   "scripts": {
     "update-vendor-bundle": "webpack --config webpack.config.vendor.js",
     "test": "karma start ClientApp/test/karma.conf.js"
