@@ -31,6 +31,7 @@ module.exports = (env) => {
                 'bootstrap',
                 'bootstrap/dist/css/bootstrap.css',
                 'font-awesome/css/font-awesome.css',
+                'ngx-toastr/toastr.css',
                 'es6-shim',
                 'es6-promise',
                 'event-source-polyfill',

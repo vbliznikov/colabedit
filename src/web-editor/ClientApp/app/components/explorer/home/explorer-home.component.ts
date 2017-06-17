@@ -1,6 +1,7 @@
 
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
+import { ToastrService } from 'ngx-toastr';
 
 import { FileSystemInfo, PathInfo, Link } from '../model';
 import { PathMapService } from '../services/path-map.service';
@@ -16,7 +17,7 @@ export class ExplorerHomeComponent implements OnInit {
     breadcrumbs: Link[] = [];
     private fileSystemEntry$: Observable<FileSystemInfo>;
 
-    constructor(private pathMapService: PathMapService) { }
+    constructor(private pathMapService: PathMapService, private toastr: ToastrService) { }
 
     ngOnInit() {
         this.fileSystemEntry$ = this.pathMapService.getFsEntryFromUrl();
@@ -24,6 +25,7 @@ export class ExplorerHomeComponent implements OnInit {
             console.log(`Resulting entry='${value}'`);
             this.breadcrumbs = this.getBreadCrumbs(value);
         });
+        this.toastr.success('Init complete', 'Explorer');
     }
 
     public getBreadCrumbs(fsInfo: FileSystemInfo): Link[] {

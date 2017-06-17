@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 import { RouterModule } from '@angular/router';
 import { UniversalModule } from 'angular2-universal';
+import { ToastrModule } from 'ngx-toastr';
 
 
 import { AppComponent, HomeComponent, NotFoundComponent, TopMenuComponent } from './components'
@@ -27,6 +28,7 @@ import { CounterComponent } from './components/counter/counter.component';
     imports: [
         UniversalModule, // Must be first import. This automatically imports BrowserModule, HttpModule, and JsonpModule too.
         FormsModule,
+        ToastrModule.forRoot(),
         RouterModule.forRoot([
             { path: '', redirectTo: 'home', pathMatch: 'full' },
             { path: 'home', component: HomeComponent, data: { title: "Home", icon: 'glyphicon-home' } },
