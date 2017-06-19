@@ -1,0 +1,7 @@
+
+.editor {
+    min-height: 200px; 
+    height: calc(100% - 40px); 
+    width:calc(100% - 15px);
+    overflow: auto;
+}

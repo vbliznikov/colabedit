@@ -6,9 +6,20 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "skipDefaultLibCheck": true,
-    "lib": [ "es6", "dom" ],
-    "types": [ "node" ]
+    "lib": [
+      "es6",
+      "dom"
+    ],
+    "types": [
+      "node",
+      "ace"
+    ]
   },
-  "exclude": [ "bin", "node_modules" ],
-  "atom": { "rewriteTsconfig": false }
+  "exclude": [
+    "bin",
+    "node_modules"
+  ],
+  "atom": {
+    "rewriteTsconfig": false
+  }
 }
