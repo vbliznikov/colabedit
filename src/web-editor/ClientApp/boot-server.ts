@@ -15,7 +15,8 @@ export default createServerRenderer(params => {
             name: 'angular-universal request',
             properties: {
                 baseUrl: '/',
-                requestUrl: params.url,
+                // Workarround to avoid reference errors when url address a complex view with window.* objects access
+                requestUrl: '/',//params.url,
                 originUrl: params.origin,
                 preboot: false,
                 document: '<app></app>'
