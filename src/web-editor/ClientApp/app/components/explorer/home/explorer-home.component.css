@@ -14,7 +14,15 @@
 .editor-area {
     /*margin-left: 250px;*/
     /*padding: 15px;*/
-    width: 100%;
+    width: calc(100% - 250px);
+}
+
+.handle-bar {
+    background-color:black; 
+    cursor:e-resize; 
+    height:100%; 
+    width:2px;
+    z-index: 10;
 }
 
 .breadcrumbs-pannel {

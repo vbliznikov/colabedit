@@ -3,10 +3,11 @@
         <explorer-breadcrumbs [pathItems]="breadcrumbs"></explorer-breadcrumbs>
     </div>
     <div class="d-flex flex-row fixed w-100" style="height:calc(100% - 112px);">
-        <div class="folder-content">
+        <div #navigationBar class="folder-content">
             <file-explorer [fileSystemEntry]="fileSystemEntry$ "></file-explorer>
         </div>
-        <div class="editor-area ">
+        <div splitHandle [left]="navigationBar" [right]="editorArea" [minWidth]="200" class="handle-bar"></div>
+        <div #editorArea class="editor-area">
             <file-editor></file-editor>
         </div>
     </div>
