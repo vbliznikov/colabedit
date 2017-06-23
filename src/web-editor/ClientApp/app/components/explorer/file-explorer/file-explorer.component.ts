@@ -10,7 +10,6 @@ import { Link, FileSystemInfo } from '../model';
     styleUrls: ['file-explorer.component.css', '../toolbar.css']
 })
 export class FileExplorerComponent implements OnInit {
-    @Input() fileSystemEntry: Observable<FileSystemInfo>;
     @Input() items: FileSystemInfo[];
     @Output() itemActivate: EventEmitter<FileSystemInfo> = new EventEmitter();
 
