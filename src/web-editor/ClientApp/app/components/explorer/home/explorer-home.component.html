@@ -4,7 +4,7 @@
     </div>
     <div class="d-flex flex-row fixed w-100" style="height:calc(100% - 112px);">
         <div #navigationBar class="folder-content">
-            <file-explorer [fileSystemEntry]="fileSystemEntry$ "></file-explorer>
+            <file-explorer [items]="folderContent" (itemActivate)="onActivateFsEntry($event)"></file-explorer>
         </div>
         <div splitHandle [left]="navigationBar" [right]="editorArea" [minWidth]="200" class="handle-bar"></div>
         <div #editorArea class="editor-area">

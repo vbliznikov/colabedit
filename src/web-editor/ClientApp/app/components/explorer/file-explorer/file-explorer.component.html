@@ -1,16 +1,18 @@
 <div class="explorer">
-    <!--<div class="toolbar btn-toolbar" role="toolbar">-->
     <div class="toolbar d-flex justify-content-end">
-        <button type="button" title="New Folder" class="btn btn-sm btn-secondary mr-1 fa fa-folder-o"></button>
-        <button type="button" title="New File" class="btn btn-sm btn-secondary fa fa-file-o"></button>
+        <button type="button" title="New Folder" (click)="onNewItemRequest('folder')" class="btn btn-sm btn-secondary mr-1 fa fa-folder-o"></button>
+        <button type="button" title="New File" (click)="onNewItemRequest('file')" class="btn btn-sm btn-secondary mr-2 fa fa-file-o"></button>
+        <button type="button" title="Delete selected" (click)="onDeleteRequest" [disabled]="!selectedItemIndex" class="btn btn-sm btn-secondary fa fa-trash-o"></button>
     </div>
-    <!--</div>-->
     <div class="content-list">
-        <ul class="nav flex-column">
-            <li class="nav-item" *ngFor="let item of folderContent">
-                <a class="nav-link" [routerLink]="item.path" [queryParams]="item.query">
-                        <span class="fa" [ngClass]="{'fa-file': item.query, 'fa-folder fa-lg': !item.query}"></span> {{item.title}}</a>
-            </li>
-        </ul>
+        <div class="" #newItemArea style="padding: 1em; padding-bottom: 0.5em; display: none">
+            <input type="text" #newItemInput placeholder="enter item name" (blur)="checkInput($event)" (keyup)="checkSpecialKeys($event)">
+        </div>
+        <div *ngFor="let item of items; let i=index" class="fs-item" [ngClass]="{'selected': i === selectedItemIndex}" (click)="selectItem(i, $event)"
+            title="Click to select, Double click to activate." [draggable]="item.isFile" (dblclick)="activateItem(i, $event)">
+            <!--<a class="btn btn-outline">-->
+            <span class="fa" [ngClass]="{'fa-file': item.isFile, 'fa-folder fa-lg': !item.isFile}"></span> {{item.name}}
+            <!--</a>-->
+        </div>
     </div>
 </div>

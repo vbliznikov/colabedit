@@ -4,11 +4,11 @@ export class FileSystemInfo {
     path: PathInfo;
     isFile: boolean;
 
-    constructor(path: PathInfo, isFile: boolean) {
+    constructor(path: PathInfo, isFile?: boolean) {
         if (!path) throw '[path] param should be defined.';
 
         this.path = path;
-        this.isFile = isFile;
+        this.isFile = isFile || false;
         this.name = path.parts[path.parts.length - 1];
     }
 
@@ -50,6 +50,13 @@ export class PathInfo {
 
     static get default(): PathInfo {
         return new PathInfo(['.']);
+    }
+
+    static fromString(value: string) {
+        if (!value) throw new Error('Path string can\'t be empty');
+        const parts: string[] = value.split(PathInfo.pathSeparator);
+
+        return new PathInfo(parts);
     }
 }
 

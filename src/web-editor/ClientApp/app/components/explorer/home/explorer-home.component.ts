@@ -1,5 +1,6 @@
 
 import { Component, OnInit } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router'
 import { Observable } from 'rxjs/Observable';
 import { ToastrService } from 'ngx-toastr';
 
@@ -14,21 +15,54 @@ import { PathMapService } from '../services/path-map.service';
 
 export class ExplorerHomeComponent implements OnInit {
     readonly basePath = '/explorer';
-    breadcrumbs: Link[] = [];
+    public breadcrumbs: Link[] = [];
+    public folderContent: FileSystemInfo[];
+    public currentPath: FileSystemInfo;
     private fileSystemEntry$: Observable<FileSystemInfo>;
 
-    constructor(private pathMapService: PathMapService, private toastr: ToastrService) { }
+    constructor(private pathMapService: PathMapService, private router: Router, private activeRoute: ActivatedRoute,
+        private toastr: ToastrService) { }
 
     ngOnInit() {
+        console.log('Explorer::Init');
         this.fileSystemEntry$ = this.pathMapService.getFsEntryFromUrl();
         this.fileSystemEntry$.subscribe((value) => {
-            console.log(`Resulting entry='${value}'`);
+            console.log(`Current fsEntry='${value}'`);
+            this.currentPath = value;
             this.breadcrumbs = this.getBreadCrumbs(value);
+            this.folderContent = this.getFolderContent(value);
         });
-        this.toastr.success('Init complete', 'Explorer');
     }
 
-    public getBreadCrumbs(fsInfo: FileSystemInfo): Link[] {
+    private onActivateFsEntry(entry: FileSystemInfo) {
+        console.log(`ExplorerHome::onActivate(${entry})`)
+
+        if (entry.isFile) {
+            // Open in Editor
+            // const currentfolderPath = this.currentPath.isFile ? this.currentPath.parent.name : this.currentPath.name;
+            // this.router.navigate([`../${currentfolderPath}`], { queryParams: { 'file': entry.name }, relativeTo: this.activeRoute })
+        } else
+            this.router.navigate([entry.name], { relativeTo: this.activeRoute });
+
+    }
+
+    private getFolderContent(fsInfo: FileSystemInfo): FileSystemInfo[] {
+        // TODO: Request items from Server
+        const items: FileSystemInfo[] = [];
+
+        for (let i = 1; i <= 5; i++) {
+            const folder = new FileSystemInfo(PathInfo.fromString(`./Folder-${i}`));
+            items.push(folder);
+        }
+        for (let i = 1; i <= 5; i++) {
+            const file = new FileSystemInfo(PathInfo.fromString(`./file${i}`), true);
+            items.push(file);
+        }
+
+        return items;
+    }
+
+    private getBreadCrumbs(fsInfo: FileSystemInfo): Link[] {
         console.log(`'ExplorerHome:' getBreadCrumbs()`);
         const breabcrumbs: Link[] = [];
         let path = this.basePath;

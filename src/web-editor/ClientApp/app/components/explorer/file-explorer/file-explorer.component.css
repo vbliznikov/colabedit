@@ -8,3 +8,21 @@
     height: calc(100% - 40px);
     overflow-y: auto;
 }
+
+.hidden {
+    display: none;
+}
+
+.fs-item {
+    padding: 0.2em 1em 0.2em 1em;
+    margin-top: 0.2em;
+    cursor: pointer;
+}
+
+.selected {
+    background-color: silver;
+}
+
+.fs-item:hover {
+    background-color: gray;
+}

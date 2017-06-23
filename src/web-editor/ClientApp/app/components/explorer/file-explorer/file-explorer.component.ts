@@ -1,5 +1,5 @@
 
-import { Component, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
 import { Link, FileSystemInfo } from '../model';
@@ -9,52 +9,71 @@ import { Link, FileSystemInfo } from '../model';
     templateUrl: 'file-explorer.component.html',
     styleUrls: ['file-explorer.component.css', '../toolbar.css']
 })
-
-export class FileExplorerComponent implements OnInit, OnChanges {
+export class FileExplorerComponent implements OnInit {
     @Input() fileSystemEntry: Observable<FileSystemInfo>;
+    @Input() items: FileSystemInfo[];
+    @Output() itemActivate: EventEmitter<FileSystemInfo> = new EventEmitter();
 
     readonly basePath = '/explorer';
     private currentEntry: FileSystemInfo;
-    public folderContent: Link[] = [];
+
+    private selectedItemIndex;
+    @ViewChild('newItemArea') newItemSection: ElementRef;
+    @ViewChild('newItemInput') newItemInput: ElementRef;
+
     constructor() { }
 
-    ngOnChanges(changes: SimpleChanges): void {
-
-    }
-
     ngOnInit() {
-        if (!this.fileSystemEntry) return;
-        this.fileSystemEntry.subscribe(value => {
-            this.currentEntry = value;
-            this.folderContent = this.getfolderContent(value);
-
-        });
     }
 
-    public getfolderContent(fsInfo: FileSystemInfo): Link[] {
-        console.log('getfolderContent()');
-        const items: Link[] = [];
+    private onNewItemRequest(itemType) {
+        this.newItemInput.nativeElement.placeholder = `enter new ${itemType} name`;
+        this.newItemInput.nativeElement.value = '';
+        this.newItemSection.nativeElement.style.display = 'block';
+        this.newItemInput.nativeElement.focus();
+    }
 
-        let folderPath = this.basePath + '/';
-        if (fsInfo.isFile)
-            folderPath += fsInfo.parent.path.toString();
-        else
-            folderPath += fsInfo.path.toString();
+    private onDeleteRequest() {
 
-        for (let i = 0; i < 20; i++) {
-            const name = `Folder${i}`;
-            const path = `${folderPath}/${name}`;
-            const link: Link = { path: `${path}`, title: name };
-            items.push(link);
+    }
+
+    private checkSpecialKeys(event) {
+        switch (event.code) {
+            case 'Enter':
+                // Check Input
+                if (this.newItemInput.nativeElement.value)
+                    this.checkInput();
+                break;
+            case 'Escape':
+                // Cancel input
+                this.hideInput();
+                break;
         }
+    }
 
-        for (let i = 0; i < 10; i++) {
-            const name = `file${i}.json`;
-            const path = `${folderPath}`;
-            const link: Link = { path: `${path}`, title: name, query: { file: name } };
-            items.push(link);
+    private checkInput() {
+        // Check for existence
+        // Create new item
+
+        this.hideInput();
+    }
+
+    private hideInput() {
+        this.newItemSection.nativeElement.style.display = 'none';
+        // this.newItemInput.nativeElement.value = '';
+    }
+
+    private selectItem(itemIndex, event) {
+        if (this.selectedItemIndex === itemIndex)
+            this.selectedItemIndex = undefined;
+        else {
+            this.selectedItemIndex = itemIndex;
         }
+    }
 
-        return items;
+    public activateItem(itemIndex, event) {
+        const item = this.items[itemIndex];
+        console.log(`Item activate:${item}`);
+        this.itemActivate.emit(item);
     }
 }
