@@ -21,6 +21,13 @@ export class FileSystemInfo {
     toString() {
         return `<FileSystemInfo>[isFile:${this.isFile};path:${this.path}]`;
     }
+
+    static ascComparer(a: FileSystemInfo, b: FileSystemInfo): number {
+        if (a.isFile && !b.isFile) return 1;
+        if (!a.isFile && b.isFile) return -1;
+
+        return a.name > b.name ? 1 : (a.name < b.name) ? -1 : 0;
+    }
 }
 
 export class PathInfo {

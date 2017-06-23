@@ -2,7 +2,7 @@
 import { Component, OnInit, Input, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
-import { Link, FileSystemInfo } from '../model';
+import { Link, FileSystemInfo, PathInfo } from '../model';
 
 @Component({
     selector: 'file-explorer',
@@ -17,8 +17,11 @@ export class FileExplorerComponent implements OnInit {
     private currentEntry: FileSystemInfo;
 
     private selectedIndexes: Set<number> = new Set();
+
     @ViewChild('newItemArea') newItemSection: ElementRef;
     @ViewChild('newItemInput') newItemInput: ElementRef;
+    @ViewChild('listItems') listItemsContainer: ElementRef;
+    private waitingNewItemInput = false;
 
     constructor() { }
 
@@ -27,21 +30,24 @@ export class FileExplorerComponent implements OnInit {
 
     private onNewItemRequest(itemType) {
         this.newItemInput.nativeElement.placeholder = `enter new ${itemType} name`;
+        this.newItemInput.nativeElement.dataType = itemType;
         this.newItemInput.nativeElement.value = '';
         this.newItemSection.nativeElement.style.display = 'block';
         this.newItemInput.nativeElement.focus();
+        this.waitingNewItemInput = true;
     }
 
     private onDeleteRequest() {
 
     }
 
-    private checkSpecialKeys(event) {
+    private onSpecialKeys(event) {
         switch (event.code) {
             case 'Enter':
                 // Check Input
-                if (this.newItemInput.nativeElement.value)
-                    this.checkInput();
+                const inputValue = this.newItemInput.nativeElement.value;
+                if (inputValue)
+                    this.checkInput(inputValue);
                 break;
             case 'Escape':
                 // Cancel input
@@ -50,16 +56,46 @@ export class FileExplorerComponent implements OnInit {
         }
     }
 
-    private checkInput() {
-        // Check for existence
-        // Create new item
+    private onNewInputLostFocus() {
+        const inputValue = this.newItemInput.nativeElement.value;
+        if (!inputValue) {
+            this.hideInput();
+            return;
+        }
 
+        this.checkInput(inputValue);
+    }
+
+    private checkInput(value: string) {
+        // TODOl Check for existence
+
+        // Create new item
+        if (!this.waitingNewItemInput) return;
+
+        const entryName = this.newItemInput.nativeElement.value;
+        const isFile = this.newItemInput.nativeElement.dataType === 'folder' ? false : true;
+        const fsEntry = new FileSystemInfo(PathInfo.fromString(`./${entryName}`), isFile);
+        this.items.push(fsEntry);
+        this.items.sort(FileSystemInfo.ascComparer);
         this.hideInput();
+
+        const itemIndex = this.items.indexOf(fsEntry);
+        // Mark new item as selected
+        this.selectedIndexes.clear();
+        this.selectedIndexes.add(itemIndex);
+
+        // Scroll into view if necessary
+        let htmlElements = this.listItemsContainer.nativeElement.getElementsByClassName('fs-item');
+        if (htmlElements && htmlElements.length > itemIndex) {
+            console.log(`Scroll into view ${itemIndex}/${htmlElements.length}`)
+            htmlElements[itemIndex].scrollIntoView(false);
+        }
     }
 
     private hideInput() {
         this.newItemSection.nativeElement.style.display = 'none';
-        // this.newItemInput.nativeElement.value = '';
+        this.newItemInput.nativeElement.value = '';
+        this.waitingNewItemInput = false;
     }
 
     public hasIndexSelected(index) {

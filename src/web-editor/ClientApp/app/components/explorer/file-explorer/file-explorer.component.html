@@ -4,9 +4,9 @@
         <button type="button" title="New File" (click)="onNewItemRequest('file')" class="btn btn-sm btn-secondary mr-2 fa fa-file-o"></button>
         <button type="button" title="Delete selected" (click)="onDeleteRequest" [disabled]="!hasSelection" class="btn btn-sm btn-secondary fa fa-trash-o"></button>
     </div>
-    <div class="content-list">
+    <div class="content-list" #listItems>
         <div class="" #newItemArea style="padding: 1em; padding-bottom: 0.5em; display: none">
-            <input type="text" #newItemInput placeholder="enter item name" (blur)="checkInput($event)" (keyup)="checkSpecialKeys($event)">
+            <input type="text" #newItemInput placeholder="enter item name" (blur)="onNewInputLostFocus()" (keyup)="onSpecialKeys($event)">
         </div>
         <div *ngFor="let item of items; let i=index" class="fs-item" [ngClass]="{'selected': hasIndexSelected(i)}" (click)="onSelectItem(i, $event)"
             (dblclick)="activateItem(i, $event)" title="Click to select, Double click to activate." [draggable]="item.isFile ">
