@@ -16,7 +16,7 @@ export class FileExplorerComponent implements OnInit {
     readonly basePath = '/explorer';
     private currentEntry: FileSystemInfo;
 
-    private selectedItemIndex;
+    private selectedIndexes: Set<number> = new Set();
     @ViewChild('newItemArea') newItemSection: ElementRef;
     @ViewChild('newItemInput') newItemInput: ElementRef;
 
@@ -62,11 +62,70 @@ export class FileExplorerComponent implements OnInit {
         // this.newItemInput.nativeElement.value = '';
     }
 
-    private selectItem(itemIndex, event) {
-        if (this.selectedItemIndex === itemIndex)
-            this.selectedItemIndex = undefined;
-        else {
-            this.selectedItemIndex = itemIndex;
+    public hasIndexSelected(index) {
+        return this.selectedIndexes.has(index);
+    }
+
+    public get hasSelection() {
+        return this.selectedIndexes.size > 0;
+    }
+
+    public onSelectItem(itemIndex, event) {
+        if (event.ctrlKey) {
+            if (this.selectedIndexes.has(itemIndex))
+                this.selectedIndexes.delete(itemIndex);
+            else
+                this.selectedIndexes.add(itemIndex);
+        } else if (event.shiftKey) {
+            switch (this.selectedIndexes.size) {
+                case 0:
+                    this.selectedIndexes.add(itemIndex);
+                    break;
+                case 1:
+                    let index;
+                    this.selectedIndexes.forEach(value => index = value);
+                    if (itemIndex > index) {
+                        for (let i = index + 1; i <= itemIndex; i++) {
+                            this.selectedIndexes.add(i);
+                        }
+                    } else if (itemIndex < index) {
+                        for (let i = itemIndex; i < index; i++) {
+                            this.selectedIndexes.add(i);
+                        }
+
+                    } else {
+                        this.selectedIndexes.delete(itemIndex);
+                    }
+                    break;
+                default:
+                    let minIndex = this.items.length;
+                    this.selectedIndexes.forEach(value => {
+                        if (value < minIndex) minIndex = value;
+                    });
+                    let maxIndex = 0;
+                    this.selectedIndexes.forEach(value => {
+                        if (value > maxIndex) maxIndex = value;
+                    });
+
+                    if (itemIndex < minIndex) {
+                        for (let i = itemIndex; i < minIndex; i++)
+                            this.selectedIndexes.add(i);
+                    }
+                    if (itemIndex > maxIndex) {
+                        for (let i = maxIndex + 1; i <= itemIndex; i++)
+                            this.selectedIndexes.add(i);
+                    }
+                    if (itemIndex > minIndex && itemIndex < maxIndex) {
+                        for (let i = minIndex + 1; i <= itemIndex; i++) {
+                            if (!this.selectedIndexes.has(i))
+                                this.selectedIndexes.add(i);
+                        }
+                    }
+            }
+        } else {
+            this.selectedIndexes.clear();
+            console.log(this.selectedIndexes.size);
+            this.selectedIndexes.add(itemIndex);
         }
     }
 
