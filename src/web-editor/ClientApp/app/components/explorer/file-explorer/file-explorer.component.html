@@ -8,10 +8,11 @@
         <div class="" #newItemArea style="padding: 1em; padding-bottom: 0.5em; display: none">
             <input type="text" #newItemInput placeholder="enter item name" (blur)="onNewInputLostFocus()" (keyup)="onSpecialKeys($event)">
         </div>
-        <div *ngFor="let item of items; let i=index" class="fs-item" [ngClass]="{'selected': hasIndexSelected(i)}" (click)="onSelectItem(i, $event)"
+        <div *ngFor="let item of items; let i=index" class="fs-item no-wrap" [ngClass]="{'selected': hasIndexSelected(i)}" (click)="onSelectItem(i, $event)"
             (dblclick)="activateItem(i, $event)" title="Click to select, Double click to activate." [draggable]="item.isFile ">
             <!--<a class="btn btn-outline ">-->
-            <span class="fa " [ngClass]="{ 'fa-file': item.isFile, 'fa-folder fa-lg': !item.isFile} "></span> {{item.name}}
+            <span class="fa mr-1" [ngClass]="{ 'fa-file': item.isFile, 'fa-folder fa-lg': !item.isFile} "></span>
+            <span class="no-wrap">{{item.name}}</span>
             <!--</a>-->
         </div>
     </div>

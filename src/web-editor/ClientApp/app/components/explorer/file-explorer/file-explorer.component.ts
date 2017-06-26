@@ -67,29 +67,63 @@ export class FileExplorerComponent implements OnInit {
     }
 
     private checkInput(value: string) {
-        // TODOl Check for existence
 
-        // Create new item
         if (!this.waitingNewItemInput) return;
+        // validate input
 
+        // create new item
         const entryName = this.newItemInput.nativeElement.value;
         const isFile = this.newItemInput.nativeElement.dataType === 'folder' ? false : true;
         const fsEntry = new FileSystemInfo(PathInfo.fromString(`./${entryName}`), isFile);
-        this.items.push(fsEntry);
-        this.items.sort(FileSystemInfo.ascComparer);
+        if (this.isItemExists(fsEntry)) {
+            const msg = isFile ? 'File' : 'Folder' + ` ${entryName} alreay exists`;
+            this.showInputError(msg);
+            return;
+        }
         this.hideInput();
 
-        const itemIndex = this.items.indexOf(fsEntry);
+        // try to find position of item which is greater then new Item
+        let itemIndex = this.items.findIndex((item) => {
+            if (FileSystemInfo.ascComparer(fsEntry, item) <= 0)
+                return true;
+            else
+                return false;
+        });
+        console.log(`index=${itemIndex}`)
+        if (itemIndex >= 0) {
+            this.items.splice(itemIndex, 0, fsEntry);
+        }
+        else {
+            itemIndex = this.items.length;
+            this.items.push(fsEntry);
+        }
         // Mark new item as selected
         this.selectedIndexes.clear();
         this.selectedIndexes.add(itemIndex);
 
         // Scroll into view if necessary
-        let htmlElements = this.listItemsContainer.nativeElement.getElementsByClassName('fs-item');
-        if (htmlElements && htmlElements.length > itemIndex) {
-            console.log(`Scroll into view ${itemIndex}/${htmlElements.length}`)
-            htmlElements[itemIndex].scrollIntoView(false);
-        }
+        // Execute this action async with delay to allow angular do change detection and update DOM
+        setTimeout(() => {
+            let htmlElements = this.listItemsContainer.nativeElement.getElementsByClassName('fs-item');
+            if (htmlElements && htmlElements.length > itemIndex) {
+                htmlElements[itemIndex].scrollIntoView(false); // alignt bottom of the element to the view end
+            }
+        }, 100);
+    }
+
+    private isItemExists(itemSearch: FileSystemInfo): boolean {
+        const index = this.items.findIndex((item) => {
+            if (item.name == itemSearch.name)
+                return true;
+            else
+                return false;
+        });
+
+        return index >= 0;
+    }
+
+    private showInputError(message: string) {
+
     }
 
     private hideInput() {
@@ -160,7 +194,6 @@ export class FileExplorerComponent implements OnInit {
             }
         } else {
             this.selectedIndexes.clear();
-            console.log(this.selectedIndexes.size);
             this.selectedIndexes.add(itemIndex);
         }
     }

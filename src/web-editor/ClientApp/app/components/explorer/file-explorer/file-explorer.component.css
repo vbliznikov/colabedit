@@ -18,7 +18,10 @@
     margin-top: 0.2em;
     cursor: pointer;
 }
-
+.no-wrap {
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
 .selected {
     background-color: silver;
 }
