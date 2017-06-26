@@ -111,7 +111,7 @@ export class FileExplorerComponent implements OnInit {
     private checkInput(value: string) {
 
         if (!this.waitingNewItemInput) return;
-        // validate input
+        // TODO: validate text input
 
         // create new item
         const entryName = this.newItemInput.nativeElement.value;
@@ -123,7 +123,31 @@ export class FileExplorerComponent implements OnInit {
             return;
         }
         this.hideInput();
+        this.onNewItem(fsEntry);
+    }
 
+    private isItemExists(itemSearch: FileSystemInfo): boolean {
+        const index = this.items.findIndex((item) => {
+            if (item.name == itemSearch.name)
+                return true;
+            else
+                return false;
+        });
+
+        return index >= 0;
+    }
+
+    private showInputError(message: string) {
+
+    }
+
+    private hideInput() {
+        this.newItemSection.nativeElement.style.display = 'none';
+        this.newItemInput.nativeElement.value = '';
+        this.waitingNewItemInput = false;
+    }
+
+    private onNewItem(fsEntry: FileSystemInfo) {
         // Generate event
         const newItemRequest = new ItemActionRequest(fsEntry, false);
         this.newItem.emit(newItemRequest);
@@ -156,27 +180,6 @@ export class FileExplorerComponent implements OnInit {
                 htmlElements[itemIndex].scrollIntoView(false); // alignt bottom of the element to the view end
             }
         }, 100);
-    }
-
-    private isItemExists(itemSearch: FileSystemInfo): boolean {
-        const index = this.items.findIndex((item) => {
-            if (item.name == itemSearch.name)
-                return true;
-            else
-                return false;
-        });
-
-        return index >= 0;
-    }
-
-    private showInputError(message: string) {
-
-    }
-
-    private hideInput() {
-        this.newItemSection.nativeElement.style.display = 'none';
-        this.newItemInput.nativeElement.value = '';
-        this.waitingNewItemInput = false;
     }
 
     private onSelectItem(itemIndex, event) {
