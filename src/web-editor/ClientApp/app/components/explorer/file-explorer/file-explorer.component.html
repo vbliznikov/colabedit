@@ -2,18 +2,16 @@
     <div class="toolbar d-flex justify-content-end">
         <button type="button" title="New Folder" (click)="onNewItemRequest('folder')" class="btn btn-sm btn-secondary mr-1 fa fa-folder-o"></button>
         <button type="button" title="New File" (click)="onNewItemRequest('file')" class="btn btn-sm btn-secondary mr-2 fa fa-file-o"></button>
-        <button type="button" title="Delete selected" (click)="onDeleteRequest" [disabled]="!hasSelection" class="btn btn-sm btn-secondary fa fa-trash-o"></button>
+        <button type="button" title="Delete selected" (click)="onDeleteRequest()" [disabled]="!hasSelection" class="btn btn-sm btn-secondary fa fa-trash-o"></button>
     </div>
     <div class="content-list" #listItems>
         <div class="" #newItemArea style="padding: 1em; padding-bottom: 0.5em; display: none">
             <input type="text" #newItemInput placeholder="enter item name" (blur)="onNewInputLostFocus()" (keyup)="onSpecialKeys($event)">
         </div>
         <div *ngFor="let item of items; let i=index" class="fs-item no-wrap" [ngClass]="{'selected': hasIndexSelected(i)}" (click)="onSelectItem(i, $event)"
-            (dblclick)="activateItem(i, $event)" title="Click to select, Double click to activate." [draggable]="item.isFile ">
-            <!--<a class="btn btn-outline ">-->
+            (dblclick)="onActivateItem(i, $event)" title="Click to select, Double click to activate." [draggable]="item.isFile ">
             <span class="fa mr-1" [ngClass]="{ 'fa-file': item.isFile, 'fa-folder fa-lg': !item.isFile} "></span>
             <span class="no-wrap">{{item.name}}</span>
-            <!--</a>-->
         </div>
     </div>
 </div>

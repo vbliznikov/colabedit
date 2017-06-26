@@ -12,11 +12,12 @@ import { Link, FileSystemInfo, PathInfo } from '../model';
 export class FileExplorerComponent implements OnInit {
     @Input() items: FileSystemInfo[];
     @Output() itemActivate: EventEmitter<FileSystemInfo> = new EventEmitter();
+    @Output() itemsDelete: EventEmitter<ItemActionRequest<FileSystemInfo>[]> = new EventEmitter();
+    @Output() newItem: EventEmitter<ItemActionRequest<FileSystemInfo>> = new EventEmitter();
+    public selectedIndexes: Set<number> = new Set();
 
     readonly basePath = '/explorer';
     private currentEntry: FileSystemInfo;
-
-    private selectedIndexes: Set<number> = new Set();
 
     @ViewChild('newItemArea') newItemSection: ElementRef;
     @ViewChild('newItemInput') newItemInput: ElementRef;
@@ -26,6 +27,25 @@ export class FileExplorerComponent implements OnInit {
     constructor() { }
 
     ngOnInit() {
+    }
+
+    public get selectedItems(): FileSystemInfo[] {
+        return Array
+            .from(this.selectedIndexes.values())
+            .map(index => this.items[index]);
+    }
+
+    public hasIndexSelected(index) {
+        return this.selectedIndexes.has(index);
+    }
+
+    public get hasSelection() {
+        return this.selectedIndexes.size > 0;
+    }
+
+    public selectItems(...items: FileSystemInfo[]) {
+        items.map(item => this.items.indexOf(item))
+            .forEach(index => this.selectedIndexes.add(index));
     }
 
     private onNewItemRequest(itemType) {
@@ -38,7 +58,29 @@ export class FileExplorerComponent implements OnInit {
     }
 
     private onDeleteRequest() {
+        // TODO: Delete confirmation request
+        const itemsDeleteRequest = this.selectedItems
+            .map((value) => new ItemActionRequest(value, false));
+        this.itemsDelete.emit(itemsDeleteRequest);
 
+        const idexes2Delete = itemsDeleteRequest
+            .filter(request => !request.cancel)
+            .map(request => this.items.indexOf(request.item))
+            .sort((a, b) => {
+                if (a === b) return 0;
+                if (a < b) return 1;
+                return -1;
+            });
+        this.selectedIndexes.clear();
+        // remove fromn list
+        idexes2Delete.forEach(index => {
+            this.items.splice(index, 1);
+        });
+        const canceledRequest = itemsDeleteRequest
+            .filter(request => request.cancel)
+            .map(request => request.item);
+        // retain selection on canceled items
+        this.selectItems(...canceledRequest);
     }
 
     private onSpecialKeys(event) {
@@ -82,6 +124,11 @@ export class FileExplorerComponent implements OnInit {
         }
         this.hideInput();
 
+        // Generate event
+        const newItemRequest = new ItemActionRequest(fsEntry, false);
+        this.newItem.emit(newItemRequest);
+        if (newItemRequest.cancel) return;
+
         // try to find position of item which is greater then new Item
         let itemIndex = this.items.findIndex((item) => {
             if (FileSystemInfo.ascComparer(fsEntry, item) <= 0)
@@ -89,7 +136,7 @@ export class FileExplorerComponent implements OnInit {
             else
                 return false;
         });
-        console.log(`index=${itemIndex}`)
+
         if (itemIndex >= 0) {
             this.items.splice(itemIndex, 0, fsEntry);
         }
@@ -97,7 +144,7 @@ export class FileExplorerComponent implements OnInit {
             itemIndex = this.items.length;
             this.items.push(fsEntry);
         }
-        // Mark new item as selected
+        // Mark new item as selected. Clear selection from other items for clarity
         this.selectedIndexes.clear();
         this.selectedIndexes.add(itemIndex);
 
@@ -132,15 +179,7 @@ export class FileExplorerComponent implements OnInit {
         this.waitingNewItemInput = false;
     }
 
-    public hasIndexSelected(index) {
-        return this.selectedIndexes.has(index);
-    }
-
-    public get hasSelection() {
-        return this.selectedIndexes.size > 0;
-    }
-
-    public onSelectItem(itemIndex, event) {
+    private onSelectItem(itemIndex, event) {
         if (event.ctrlKey) {
             if (this.selectedIndexes.has(itemIndex))
                 this.selectedIndexes.delete(itemIndex);
@@ -198,9 +237,14 @@ export class FileExplorerComponent implements OnInit {
         }
     }
 
-    public activateItem(itemIndex, event) {
+    private onActivateItem(itemIndex, event) {
         const item = this.items[itemIndex];
         console.log(`Item activate:${item}`);
         this.itemActivate.emit(item);
     }
+}
+
+export class ItemActionRequest<T> {
+    reason: string;
+    constructor(public item: T, public cancel: boolean) { }
 }
