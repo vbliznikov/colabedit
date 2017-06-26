@@ -10,10 +10,13 @@
       "es6",
       "dom"
     ],
-    "types": [
-      "node",
-      "ace"
+    "typeRoots": [
+      "node_modules/@types"
     ]
+    // "types": [
+    //   "node",
+    //   "ace"
+    // ]
   },
   "exclude": [
     "bin",
