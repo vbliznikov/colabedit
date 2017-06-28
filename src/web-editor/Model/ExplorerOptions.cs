@@ -2,6 +2,6 @@
 {
     public class ExplorerOptions
     {
-        public string ContentRoot { get; set; }
+        public string EditorRoot { get; set; }
     }
 }
