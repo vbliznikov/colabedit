@@ -7,7 +7,7 @@
         {
             "taskName": "build",
             "args": [
-                "${workspaceRoot}/src/web-editor/ColabEdit.csproj"
+                "${workspaceRoot}/src/src.sln"
             ],
             "isBuildCommand": true,
             "problemMatcher": "$msCompile"
