@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ColabEdit", "web-editor\ColabEdit.csproj", "{846CCD50-7C23-4A52-8B71-EE14D875F972}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ColabEdit", "web-editor\CollabEdit.csproj", "{846CCD50-7C23-4A52-8B71-EE14D875F972}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "web-editor.test", "web-editor.test\web-editor.test.csproj", "{C5D48E3B-F5F3-472E-8503-AF80D56C0CC8}"
 EndProject
