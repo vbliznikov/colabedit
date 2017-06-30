@@ -64,7 +64,8 @@ namespace CollabEdit.Controllers
                 Name = value.Name,
                 Path = _pathMap.ToVirtulPath(value.FullName),
                 IsFile = !value.Attributes.HasFlag(FileAttributes.Directory)
-            });
+            }).ToList();
+            result.Sort();
             return new ObjectResult(result);
         }
 
