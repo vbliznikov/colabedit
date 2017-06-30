@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Xunit;
@@ -7,6 +9,7 @@ using Moq;
 
 using CollabEdit.Controllers;
 using CollabEdit.Model;
+using Microsoft.AspNetCore.Mvc;
 
 namespace CollabEdit.Test
 {
@@ -34,7 +37,11 @@ namespace CollabEdit.Test
         {
             _logger.LogInformation("Test started...");
             var controller = new ExplorerDataController(_logger, _options);
-            var result = controller.GetFolderContent("home");
+
+            ObjectResult result = Assert.IsAssignableFrom<ObjectResult>(controller.GetFolderContent("home"));
+            Assert.NotNull(result?.Value);
+            var enumerable = Assert.IsAssignableFrom<IEnumerable<FileSystemInfoDto>>(result.Value);
+            Assert.Equal(0, enumerable.Count());
 
             _logger.LogInformation("Test end");
         }
