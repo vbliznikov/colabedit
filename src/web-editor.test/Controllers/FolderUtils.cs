@@ -55,10 +55,43 @@ namespace CollabEdit.Controllers.Test
             return Directory.Exists(FilePath.Combine(RootPath, folderName));
         }
 
+        public bool FolderIsEmpty(string folderName = "")
+        {
+            var fullPath = FilePath.Combine(RootPath, folderName);
+            var dirInfo = new DirectoryInfo(fullPath);
+            if (!dirInfo.Exists)
+                throw new InvalidOperationException(string.Format("Folder {0} does not exists.", fullPath));
+
+            if (dirInfo.EnumerateFileSystemInfos().Count() == 0)
+                return true;
+            else
+                return false;
+        }
+
         public FolderUtil CreateFile(string name)
         {
             using (File.Create(FilePath.Combine(RootPath, name))) { }
             return this;
+        }
+
+        public FolderUtil CreateFileWithContent(string fileName, string content)
+        {
+            var fullPath = FilePath.Combine(RootPath, fileName);
+            using (Stream stream = File.OpenWrite(fullPath))
+            {
+                using (StreamWriter writer = new StreamWriter(stream))
+                {
+                    writer.Write(content);
+                }
+            }
+            return this;
+        }
+
+        public string ReadFile(string fileName)
+        {
+            var fullPath = FilePath.Combine(RootPath, fileName);
+            using (StreamReader reader = File.OpenText(fullPath))
+                return reader.ReadToEnd();
         }
 
         public FolderUtil CreateFiles(short count)

@@ -7,6 +7,7 @@ namespace CollabEdit.Model
         public string Path { get; set; }
         public string Name { get; set; }
         public bool IsFile { get; set; }
+        public string Content { get; set; }
 
         int IComparable.CompareTo(object obj)
         {

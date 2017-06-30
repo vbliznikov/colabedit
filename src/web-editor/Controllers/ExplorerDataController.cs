@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using CollabEdit.Model;
+using CollabEdit.IO;
 
 namespace CollabEdit.Controllers
 {
@@ -70,31 +71,47 @@ namespace CollabEdit.Controllers
         }
 
         [HttpPost("folder/{*targetPath}", Name = "CreateFolder")]
-        public IActionResult CreateFolder([FromRoute] string targetPath, [FromForm] string name)
+        public IActionResult CreateFolder([FromRoute] string targetPath, [FromForm] string folderName)
         {
-            string folderPath = Path.Combine(_pathMap.ToLocalPath(targetPath), name);
-            Directory.CreateDirectory(folderPath);
+            string folderPath = FilePath.Combine(_pathMap.ToLocalPath(targetPath), folderName);
+            if (!Directory.Exists(folderPath))
+                Directory.CreateDirectory(folderPath);
 
             return CreatedAtRoute("GetFolder", new { targetPath = _pathMap.ToVirtulPath(folderPath) },
                 new FileSystemInfoDto()
                 {
-                    Name = name,
+                    Name = folderName,
                     Path = _pathMap.ToVirtulPath(folderPath)
                 });
         }
 
+        [HttpDelete("file/{*targetPath}", Name = "DeleteFolder")]
+        public IActionResult DeleteFolder([FromRoute] string targetPath)
+        {
+            var fullPath = _pathMap.ToLocalPath(targetPath);
+            if (targetPath.Equals(_pathMap.VirtualRoot, StringComparison.OrdinalIgnoreCase)
+                    || fullPath.Equals(_pathMap.PhysicalRoot, StringComparison.OrdinalIgnoreCase))
+                return new StatusCodeResult(403);
+
+            var dirInfo = new DirectoryInfo(fullPath);
+            if (dirInfo.Exists)
+                dirInfo.Delete(true);
+
+            return new NoContentResult();
+        }
+
         [HttpDelete("folder/{*targetPath}", Name = "DeleteFileSystemObjects")]
-        public IActionResult DeleteFileSystemObjects([FromRoute] string targetPath, [FromBody] FileSystemInfoDto[] objects)
+        public IActionResult DeleteFileSystemObjects([FromRoute] string targetPath, [FromBody] FileSystemInfoDto[] entries)
         {
             var basePath = _pathMap.ToLocalPath(targetPath);
-            foreach (var fsObject in objects)
+            foreach (var fsObject in entries)
             {
-                var path = Path.Combine(basePath, fsObject.Name);
+                var path = FilePath.Combine(basePath, fsObject.Name);
                 if (fsObject.IsFile && System.IO.File.Exists(path))
                     System.IO.File.Delete(path);
 
                 if (!fsObject.IsFile && Directory.Exists(path))
-                    Directory.Delete(path);
+                    Directory.Delete(path, true);
             }
 
             return new NoContentResult();
@@ -108,21 +125,34 @@ namespace CollabEdit.Controllers
         }
 
         [HttpPost("file/{*targetPath}", Name = "CreateFile")]
-        public IActionResult Createfile([FromRoute] string targetPath, [FromForm] string name)
+        public IActionResult Createfile([FromRoute] string targetPath, [FromForm] string fileName)
         {
-            string fullPath = Path.Combine(_pathMap.ToLocalPath(targetPath), name);
-            using (System.IO.File.Create(fullPath)) { }
+            string fullPath = FilePath.Combine(_pathMap.ToLocalPath(targetPath), fileName);
+            //We create file only if it does not exists; existing file is Ok since we do not provide any content at this point
+            if (!System.IO.File.Exists(fullPath))
+                using (System.IO.File.Create(fullPath)) { }
 
             return new CreatedAtRouteResult("GetFile", new { targetPath = _pathMap.ToVirtulPath(fullPath) },
             new FileSystemInfoDto()
             {
-                Name = name,
+                Name = fileName,
                 Path = _pathMap.ToVirtulPath(fullPath),
                 IsFile = true
             });
         }
 
-        [HttpDelete("file/{*targetPath}", Name = "DelteFile")]
+        [HttpPut("file/{*targetPath}", Name = "UpdateFile")]
+        public async Task<IActionResult> UpdateFileContent([FromRoute] string targetPath, [FromBody] FileSystemInfoDto fsEntry)
+        {
+            string filePath = _pathMap.ToLocalPath(targetPath);
+            //Handle only content update now;
+            using (StreamWriter writer = new StreamWriter(System.IO.File.OpenWrite(filePath)))
+                await writer.WriteAsync(fsEntry.Content);
+
+            return new NoContentResult();
+        }
+
+        [HttpDelete("file/{*targetPath}", Name = "DeleteFile")]
         public IActionResult DeleteFile([FromRoute] string targetPath)
         {
             var path = _pathMap.ToLocalPath(targetPath);
