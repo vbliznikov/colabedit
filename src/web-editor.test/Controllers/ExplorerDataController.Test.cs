@@ -49,7 +49,11 @@ namespace CollabEdit.Controllers.Test
 
         protected void TearDown()
         {
-            editorRoot.Clear();
+            try
+            {
+                editorRoot.Clear();
+            }
+            catch { }
             runningTestsSemaphor.Release();
         }
 
