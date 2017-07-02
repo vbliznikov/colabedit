@@ -13,12 +13,13 @@ using CollabEdit.Services;
 
 namespace CollabEdit.Controllers
 {
-    [ExplorerActionFilter]
+    // [ExplorerActionFilter]
     [Route("api/explorer")]
     public class ExplorerDataController : Controller
     {
         private readonly ILogger _logger;
         private readonly IPathMapService _pathMap;
+        private const string apiErrorKey = "apiErrors";
 
         public ExplorerDataController(ILogger<ExplorerDataController> logger, IPathMapService pathMapService)
         {
@@ -26,10 +27,41 @@ namespace CollabEdit.Controllers
             _pathMap = pathMapService;
         }
 
+        private void ValidateTargetPath(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+                ModelState.AddModelError(apiErrorKey, "'targetPath' is required and should be provided in request URI");
+
+            var parts = path.Split('/');
+            if (!parts[0].Equals(_pathMap.VirtualRoot, StringComparison.OrdinalIgnoreCase))
+                ModelState.AddModelError(apiErrorKey, "'targetPath' should start from 'home'");
+        }
+
+        private void ValidateRequired(object paramValue, string paramName = "name")
+        {
+            if (paramValue == null || (paramValue is string && string.IsNullOrEmpty(paramName as string)))
+                ModelState.AddModelError(apiErrorKey,
+                    string.Format("'{0}' is required and should be provided in json body", paramName));
+        }
+
+        private string NormalizeTargetPath(string vPath)
+        {
+            return vPath.Trim('/', ' ');
+        }
+
         [HttpGet("folder/{*targetPath}", Name = "GetFolder")]
         public IActionResult GetFolderContent([FromRoute] string targetPath)
         {
-            var dirInfo = new DirectoryInfo(_pathMap.ToLocalPath(targetPath));
+            targetPath = NormalizeTargetPath(targetPath);
+            ValidateTargetPath(targetPath);
+            if (!ModelState.IsValid)
+                return new BadRequestObjectResult(ModelState);
+
+            var localPath = _pathMap.ToLocalPath(targetPath);
+            if (!Directory.Exists(localPath))
+                return new NotFoundResult();
+
+            var dirInfo = new DirectoryInfo(localPath);
             var result = dirInfo.EnumerateFileSystemInfos().Select(value => new FileSystemInfoDto()
             {
                 Name = value.Name,
@@ -43,7 +75,17 @@ namespace CollabEdit.Controllers
         [HttpPost("folder/{*targetPath}", Name = "CreateFolder")]
         public IActionResult CreateFolder([FromRoute] string targetPath, [FromBody] string name)
         {
-            string folderPath = FilePath.Combine(_pathMap.ToLocalPath(targetPath), name);
+            targetPath = NormalizeTargetPath(targetPath);
+            ValidateTargetPath(targetPath);
+            ValidateRequired(name);
+            if (!ModelState.IsValid)
+                return new BadRequestObjectResult(ModelState);
+
+            var localPath = _pathMap.ToLocalPath(targetPath);
+            if (!Directory.Exists(localPath))
+                return new NotFoundResult();
+
+            string folderPath = FilePath.Combine(localPath, name);
             if (!Directory.Exists(folderPath))
                 Directory.CreateDirectory(folderPath);
 
@@ -58,14 +100,18 @@ namespace CollabEdit.Controllers
         [HttpDelete("file/{*targetPath}", Name = "DeleteFolder")]
         public IActionResult DeleteFolder([FromRoute] string targetPath)
         {
-            var fullPath = _pathMap.ToLocalPath(targetPath);
+            targetPath = NormalizeTargetPath(targetPath);
+            ValidateTargetPath(targetPath);
+            if (!ModelState.IsValid)
+                return new BadRequestObjectResult(ModelState);
+
+            var localPath = _pathMap.ToLocalPath(targetPath);
             if (targetPath.Equals(_pathMap.VirtualRoot, StringComparison.OrdinalIgnoreCase)
-                    || fullPath.Equals(_pathMap.PhysicalRoot, StringComparison.OrdinalIgnoreCase))
+                    || localPath.Equals(_pathMap.PhysicalRoot, StringComparison.OrdinalIgnoreCase))
                 return new StatusCodeResult(403);
 
-            var dirInfo = new DirectoryInfo(fullPath);
-            if (dirInfo.Exists)
-                dirInfo.Delete(true);
+            if (Directory.Exists(localPath))
+                Directory.Delete(localPath, true);
 
             return new NoContentResult();
         }
@@ -73,6 +119,16 @@ namespace CollabEdit.Controllers
         [HttpDelete("folder/{*targetPath}", Name = "DeleteFileSystemObjects")]
         public IActionResult DeleteFileSystemObjects([FromRoute] string targetPath, [FromBody] FileSystemInfoDto[] entries)
         {
+            targetPath = NormalizeTargetPath(targetPath);
+            ValidateTargetPath(targetPath);
+            ValidateRequired(entries, "entries");
+            if (!ModelState.IsValid)
+                return new BadRequestObjectResult(ModelState);
+
+            var localPath = _pathMap.ToLocalPath(targetPath);
+            if (!Directory.Exists(localPath))
+                return new NotFoundResult();
+
             var statusResult = new List<ActionStausResponseDto<FileSystemInfoDto>>();
             var basePath = _pathMap.ToLocalPath(targetPath);
             foreach (var fsObject in entries)
@@ -126,6 +182,15 @@ namespace CollabEdit.Controllers
         [HttpGet("file/{*targetPath}", Name = "GetFile")]
         public IActionResult GetFileContent([FromRoute] string targetPath)
         {
+            targetPath = NormalizeTargetPath(targetPath);
+            ValidateTargetPath(targetPath);
+            if (!ModelState.IsValid)
+                return new BadRequestObjectResult(ModelState);
+
+            var localPath = _pathMap.ToLocalPath(targetPath);
+            if (!System.IO.File.Exists(localPath))
+                return new NotFoundResult();
+
             var path = _pathMap.ToLocalPath(targetPath);
             return new FileStreamResult(System.IO.File.OpenRead(path), "text/plain");
         }
@@ -133,7 +198,17 @@ namespace CollabEdit.Controllers
         [HttpPost("file/{*targetPath}", Name = "CreateFile")]
         public IActionResult Createfile([FromRoute] string targetPath, [FromBody] string name)
         {
-            string fullPath = FilePath.Combine(_pathMap.ToLocalPath(targetPath), name);
+            targetPath = NormalizeTargetPath(targetPath);
+            ValidateTargetPath(targetPath);
+            ValidateRequired(name);
+            if (!ModelState.IsValid)
+                return new BadRequestObjectResult(ModelState);
+
+            var localPath = _pathMap.ToLocalPath(targetPath);
+            if (!Directory.Exists(localPath))
+                return new NotFoundResult();
+
+            string fullPath = FilePath.Combine(localPath, name);
             //We create file only if it does not exists; existing file is Ok since we do not provide any content at this point
             if (!System.IO.File.Exists(fullPath))
                 using (System.IO.File.Create(fullPath)) { }
@@ -150,7 +225,16 @@ namespace CollabEdit.Controllers
         [HttpPut("file/{*targetPath}", Name = "UpdateFile")]
         public async Task<IActionResult> UpdateFileContent([FromRoute] string targetPath, [FromBody] FileSystemInfoDto fsEntry)
         {
-            string filePath = _pathMap.ToLocalPath(targetPath);
+            targetPath = NormalizeTargetPath(targetPath);
+            ValidateTargetPath(targetPath);
+            ValidateRequired(fsEntry, "fsEntry");
+            if (!ModelState.IsValid)
+                return new BadRequestObjectResult(ModelState);
+
+            var filePath = _pathMap.ToLocalPath(targetPath);
+            if (!System.IO.File.Exists(filePath))
+                return new NotFoundResult();
+
             //Handle only content update now;
             using (StreamWriter writer = new StreamWriter(System.IO.File.OpenWrite(filePath)))
                 await writer.WriteAsync(fsEntry.Content);
@@ -161,9 +245,17 @@ namespace CollabEdit.Controllers
         [HttpDelete("file/{*targetPath}", Name = "DeleteFile")]
         public IActionResult DeleteFile([FromRoute] string targetPath)
         {
-            var path = _pathMap.ToLocalPath(targetPath);
-            if (System.IO.File.Exists(path))
-                System.IO.File.Delete(path);
+            targetPath = NormalizeTargetPath(targetPath);
+            ValidateTargetPath(targetPath);
+            if (!ModelState.IsValid)
+                return new BadRequestObjectResult(ModelState);
+
+            var filePath = _pathMap.ToLocalPath(targetPath);
+            if (!System.IO.File.Exists(filePath))
+                return new NotFoundResult();
+
+            if (System.IO.File.Exists(filePath))
+                System.IO.File.Delete(filePath);
 
             return new NoContentResult();
         }
