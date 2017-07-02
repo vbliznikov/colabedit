@@ -41,16 +41,16 @@ namespace CollabEdit.Controllers
         }
 
         [HttpPost("folder/{*targetPath}", Name = "CreateFolder")]
-        public IActionResult CreateFolder([FromRoute] string targetPath, [FromForm] string folderName)
+        public IActionResult CreateFolder([FromRoute] string targetPath, [FromBody] string name)
         {
-            string folderPath = FilePath.Combine(_pathMap.ToLocalPath(targetPath), folderName);
+            string folderPath = FilePath.Combine(_pathMap.ToLocalPath(targetPath), name);
             if (!Directory.Exists(folderPath))
                 Directory.CreateDirectory(folderPath);
 
             return CreatedAtRoute("GetFolder", new { targetPath = _pathMap.ToVirtulPath(folderPath) },
                 new FileSystemInfoDto()
                 {
-                    Name = folderName,
+                    Name = name,
                     Path = _pathMap.ToVirtulPath(folderPath)
                 });
         }
@@ -73,18 +73,54 @@ namespace CollabEdit.Controllers
         [HttpDelete("folder/{*targetPath}", Name = "DeleteFileSystemObjects")]
         public IActionResult DeleteFileSystemObjects([FromRoute] string targetPath, [FromBody] FileSystemInfoDto[] entries)
         {
+            var statusResult = new List<ActionStausResponseDto<FileSystemInfoDto>>();
             var basePath = _pathMap.ToLocalPath(targetPath);
             foreach (var fsObject in entries)
             {
+                if (string.IsNullOrEmpty(fsObject.Name))
+                {
+                    statusResult.Add(new ActionStausResponseDto<FileSystemInfoDto>
+                    {
+                        Entity = fsObject,
+                        Status = ActionStatusResult.ClientFauilure,
+                        Errros = new string[1] { "'name' may not be null or empty string" }
+                    }
+                    );
+                    continue;
+                }
+
                 var path = FilePath.Combine(basePath, fsObject.Name);
                 if (fsObject.IsFile && System.IO.File.Exists(path))
-                    System.IO.File.Delete(path);
+                {
+                    var response = TryPerformActionOnEntity(() => System.IO.File.Delete(path), fsObject);
+                    statusResult.Add(response);
+                }
 
                 if (!fsObject.IsFile && Directory.Exists(path))
-                    Directory.Delete(path, true);
+                {
+                    var response = TryPerformActionOnEntity(() => Directory.Delete(path, true), fsObject);
+                    statusResult.Add(response);
+                }
             }
+            var actionResult = new ObjectResult(statusResult);
 
-            return new NoContentResult();
+            if (statusResult.Any((item) => item.Status != ActionStatusResult.Ok))
+                actionResult.StatusCode = 207; // multi status result
+
+            return actionResult;
+        }
+
+        private ActionStausResponseDto<TObj> TryPerformActionOnEntity<TObj>(Action action, TObj entity)
+        {
+            try
+            {
+                action.Invoke();
+                return new ActionStausResponseDto<TObj>(entity);
+            }
+            catch (IOException ex)
+            {
+                return new ActionStausResponseDto<TObj>(entity, ActionStatusResult.ServerFailure, ex);
+            }
         }
 
         [HttpGet("file/{*targetPath}", Name = "GetFile")]
@@ -95,9 +131,9 @@ namespace CollabEdit.Controllers
         }
 
         [HttpPost("file/{*targetPath}", Name = "CreateFile")]
-        public IActionResult Createfile([FromRoute] string targetPath, [FromForm] string fileName)
+        public IActionResult Createfile([FromRoute] string targetPath, [FromBody] string name)
         {
-            string fullPath = FilePath.Combine(_pathMap.ToLocalPath(targetPath), fileName);
+            string fullPath = FilePath.Combine(_pathMap.ToLocalPath(targetPath), name);
             //We create file only if it does not exists; existing file is Ok since we do not provide any content at this point
             if (!System.IO.File.Exists(fullPath))
                 using (System.IO.File.Create(fullPath)) { }
@@ -105,7 +141,7 @@ namespace CollabEdit.Controllers
             return new CreatedAtRouteResult("GetFile", new { targetPath = _pathMap.ToVirtulPath(fullPath) },
             new FileSystemInfoDto()
             {
-                Name = fileName,
+                Name = name,
                 Path = _pathMap.ToVirtulPath(fullPath),
                 IsFile = true
             });
