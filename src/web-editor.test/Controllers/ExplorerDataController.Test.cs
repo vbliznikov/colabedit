@@ -5,43 +5,52 @@ using System.Linq;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Xunit;
-using Moq;
 
 using CollabEdit.Controllers;
+using CollabEdit.Services;
 using CollabEdit.Model;
 using CollabEdit.IO;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace CollabEdit.Controllers.Test
 {
     public class ExplorerDataControllerTest
     {
-        private ILoggerFactory _logegrFactory;
         private ILogger<ExplorerDataController> _logger;
+        private IPathMapService _pathMapService;
         private const string contentRoot = "../../../editor-root";
-        private IOptions<ExplorerOptions> _options;
         internal FolderUtil editorRoot;
         protected ExplorerDataController controller;
+        private static Semaphore runningTestsSemaphor = new Semaphore(1, 1);
 
         public ExplorerDataControllerTest()
         {
-            _logegrFactory = new LoggerFactory();
-            _logegrFactory.AddConsole();
-            _logger = _logegrFactory.CreateLogger<ExplorerDataController>();
-            var mock = new Mock<IOptions<ExplorerOptions>>();
-            mock.Setup(options => options.Value).Returns(new ExplorerOptions()
-            {
-                EditorRoot = FilePath.Combine(Directory.GetCurrentDirectory(), contentRoot)
-            });
-            _options = mock.Object;
-            editorRoot = new FolderUtil(_options.Value.EditorRoot);
-        }
+            var loggerFactory = new LoggerFactory();
+            loggerFactory.AddConsole();
+            _logger = loggerFactory.CreateLogger<ExplorerDataController>();
 
+            var config = new ExplorerOptions
+            {
+                EditorRoot = FilePath.Combine(Directory.GetCurrentDirectory(), contentRoot),
+                CreateIfNotExists = true
+            };
+            _pathMapService = new PathMapService(Options.Create(config));
+            editorRoot = new FolderUtil(config.EditorRoot);
+        }
         protected void Setup()
         {
+            if (!runningTestsSemaphor.WaitOne(100))
+                throw new TimeoutException("Can't enter semaphor");
             editorRoot.Clear();
-            controller = new ExplorerDataController(_logger, _options);
+            controller = new ExplorerDataController(_logger, _pathMapService);
+        }
+
+        protected void TearDown()
+        {
+            editorRoot.Clear();
+            runningTestsSemaphor.Release();
         }
         protected FolderUtil SetupFoldersHierarchy(string vPath)
         {
@@ -64,6 +73,8 @@ namespace CollabEdit.Controllers.Test
             Assert.NotNull(result?.Value);
             var enumerable = Assert.IsAssignableFrom<IEnumerable<FileSystemInfoDto>>(result.Value);
             Assert.Equal(0, enumerable.Count());
+
+            TearDown();
         }
 
         [Theory]
@@ -98,6 +109,8 @@ namespace CollabEdit.Controllers.Test
             Assert.DoesNotContain(files, (item) => !item.IsFile);
             // Objects are sorted asc by name
             Assert.True(((IComparable)files[0]).CompareTo(files[filesCount - 1]) < 0);
+
+            TearDown();
         }
 
         [Theory]
@@ -131,6 +144,8 @@ namespace CollabEdit.Controllers.Test
             Assert.True(fileDto.IsFile);
             Assert.Equal(fileName, fileDto.Name);
             Assert.Equal(string.Format("{0}/{1}", vPath, fileName), fileDto.Path);
+
+            TearDown();
         }
 
         [Theory]
@@ -156,6 +171,8 @@ namespace CollabEdit.Controllers.Test
             Assert.Equal(newFolderName, dto.Name);
             Assert.Equal(expectedRouteParam, dto.Path);
             Assert.False(dto.IsFile);
+
+            TearDown();
         }
 
         [Theory]
@@ -181,6 +198,8 @@ namespace CollabEdit.Controllers.Test
             Assert.Equal(newFolderName, dto.Name);
             Assert.Equal(expectedRouteParam, dto.Path);
             Assert.False(dto.IsFile);
+
+            TearDown();
         }
 
         [Theory]
@@ -199,6 +218,8 @@ namespace CollabEdit.Controllers.Test
             var result = Assert.IsAssignableFrom<NoContentResult>(controller.DeleteFolder(FilePath.Combine(vPath, newFolderName)));
             Assert.Equal(204, result.StatusCode);
             Assert.False(currentFolder.FolderExists(newFolderName));
+
+            TearDown();
         }
 
         [Theory]
@@ -220,6 +241,8 @@ namespace CollabEdit.Controllers.Test
             var result = Assert.IsAssignableFrom<NoContentResult>(controller.DeleteFolder(FilePath.Combine(vPath, newFolderName)));
             Assert.Equal(204, result.StatusCode);
             Assert.False(currentFolder.FolderExists(newFolderName));
+
+            TearDown();
         }
 
         [Theory]
@@ -237,6 +260,8 @@ namespace CollabEdit.Controllers.Test
             var result = Assert.IsAssignableFrom<NoContentResult>(controller.DeleteFolder(FilePath.Combine(vPath, newFolderName)));
             Assert.Equal(204, result.StatusCode);
             Assert.False(currentFolder.FolderExists(newFolderName));
+
+            TearDown();
         }
 
         [Fact]
@@ -251,6 +276,8 @@ namespace CollabEdit.Controllers.Test
             var result = Assert.IsAssignableFrom<StatusCodeResult>(controller.DeleteFolder("home"));
             // Delete root is forbidden
             Assert.Equal(403, result.StatusCode);
+
+            TearDown();
         }
 
         [Theory]
@@ -277,6 +304,8 @@ namespace CollabEdit.Controllers.Test
             Assert.Equal(newFilename, dto.Name);
             Assert.Equal(expectedRouteParam, dto.Path);
             Assert.True(dto.IsFile);
+
+            TearDown();
         }
 
         [Theory]
@@ -287,7 +316,7 @@ namespace CollabEdit.Controllers.Test
             Assert.NotNull(controller);
 
             var currentFolder = SetupFoldersHierarchy(vPath);
-            var newFilename = "newFile.txt";
+            var newFilename = "newFile22.txt";
             const string expectedContent = "some initial content";
 
             currentFolder.CreateFileWithContent(newFilename, expectedContent);
@@ -295,6 +324,7 @@ namespace CollabEdit.Controllers.Test
 
             var result = Assert.IsAssignableFrom<CreatedAtRouteResult>(controller.Createfile(vPath, newFilename));
             //Assert that file was not ovewritten
+            Assert.True(currentFolder.FileExists(newFilename));
             var newContent = currentFolder.ReadFile(newFilename);
             Assert.Equal(expectedContent, newContent);
 
@@ -303,6 +333,8 @@ namespace CollabEdit.Controllers.Test
             Assert.Equal(newFilename, dto.Name);
             Assert.Equal(string.Format("{0}/{1}", vPath, newFilename), dto.Path);
             Assert.True(dto.IsFile);
+
+            TearDown();
         }
 
         [Theory]
@@ -341,6 +373,8 @@ namespace CollabEdit.Controllers.Test
                 }
                 Assert.Equal(lineCount, linesRead);
             }
+
+            TearDown();
         }
 
         [Theory]
@@ -362,6 +396,8 @@ namespace CollabEdit.Controllers.Test
             {
                 Assert.True(reader.EndOfStream);
             }
+
+            TearDown();
         }
 
         [Theory]
@@ -390,6 +426,8 @@ namespace CollabEdit.Controllers.Test
 
             Assert.True(currentFolder.FileExists(filename));
             Assert.Equal(expectedContent, currentFolder.ReadFile(filename));
+
+            TearDown();
         }
     }
 }

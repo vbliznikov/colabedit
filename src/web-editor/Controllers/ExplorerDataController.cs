@@ -9,56 +9,26 @@ using Microsoft.Extensions.Options;
 
 using CollabEdit.Model;
 using CollabEdit.IO;
+using CollabEdit.Services;
 
 namespace CollabEdit.Controllers
 {
+    [ExplorerActionFilter]
     [Route("api/explorer")]
     public class ExplorerDataController : Controller
     {
         private readonly ILogger _logger;
-        private ExplorerOptions _configOptions;
-        private const string contentRootPathdefault = "./wwwwroot/editor-root";
-        private readonly PathMap _pathMap;
+        private readonly IPathMapService _pathMap;
 
-        public ExplorerDataController(ILogger<ExplorerDataController> logger, IOptions<ExplorerOptions> options)
+        public ExplorerDataController(ILogger<ExplorerDataController> logger, IPathMapService pathMapService)
         {
             _logger = logger;
-            _configOptions = options.Value;
-            string rootPath;
-
-            if (string.IsNullOrEmpty(_configOptions.EditorRoot))
-            {
-                _logger.LogInformation("Editor root is not configured, use default value '{0}'", contentRootPathdefault);
-                rootPath = contentRootPathdefault;
-            }
-            else
-            {
-                _logger.LogInformation("Editor root is configured to '{0}'", _configOptions.EditorRoot);
-                rootPath = _configOptions.EditorRoot;
-            }
-            // Try to create folder
-            if (!Directory.Exists(rootPath))
-            {
-                try
-                {
-                    Directory.CreateDirectory(rootPath);
-                }
-                catch (IOException ex)
-                {
-                    var msg = string.Format("Can't initialize Editor root folder '{0}'", Path.GetFullPath(rootPath));
-                    throw new Exception(msg, ex);
-                }
-            }
-            _pathMap = new PathMap(rootPath);
+            _pathMap = pathMapService;
         }
 
         [HttpGet("folder/{*targetPath}", Name = "GetFolder")]
         public IActionResult GetFolderContent([FromRoute] string targetPath)
         {
-            _logger.LogDebug("target path={0}", targetPath);
-            if (string.IsNullOrEmpty(targetPath))
-                targetPath = "home";
-
             var dirInfo = new DirectoryInfo(_pathMap.ToLocalPath(targetPath));
             var result = dirInfo.EnumerateFileSystemInfos().Select(value => new FileSystemInfoDto()
             {

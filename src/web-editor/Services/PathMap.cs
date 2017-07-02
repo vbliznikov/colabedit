@@ -1,30 +1,36 @@
 ﻿using System;
 using System.IO;
+using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 
-namespace CollabEdit.Controllers
+namespace CollabEdit.Services
 {
-    public class PathMap
+    public class PathMapService : IPathMapService
     {
         public const string HomePathDefault = "home";
         public string PhysicalRoot { get; }
         public string VirtualRoot { get; }
 
-        public PathMap(string physicalRoot) : this(physicalRoot, null)
+        public PathMapService(IOptions<ExplorerOptions> options)
         {
+            if (options == null) throw new ArgumentNullException(nameof(options));
+            var config = options.Value ?? new ExplorerOptions();
+
+            if (string.IsNullOrEmpty(config.EditorRoot))
+                throw new ArgumentException("EditorRoot configuration value is incorrect. " +
+                "Should be set to full or relative path where editor content will recide.", nameof(options));
+            if (string.IsNullOrEmpty(config.VirtualRoot))
+                throw new ArgumentException("VirtualRoot configuration value is incorrect.", nameof(options));
+
+            VirtualRoot = config.VirtualRoot;
+            PhysicalRoot = Path.IsPathRooted(config.EditorRoot)
+                ? config.EditorRoot
+                : Path.GetFullPath(config.EditorRoot);
+
+            if (config.CreateIfNotExists && !Directory.Exists(PhysicalRoot))
+                Directory.CreateDirectory(PhysicalRoot);
+
         }
-
-        public PathMap(string physicalRoot, string virtualRoot)
-        {
-            if (string.IsNullOrEmpty(physicalRoot)) throw new ArgumentException("Argument may not be null or empty string", "physicalRoot");
-
-            PhysicalRoot = Path.IsPathRooted(physicalRoot) ? physicalRoot : Path.GetFullPath(physicalRoot);
-            if (!string.IsNullOrEmpty(virtualRoot))
-                VirtualRoot = virtualRoot;
-            else
-                VirtualRoot = HomePathDefault;
-        }
-
         public string ToLocalPath(string virtualPath)
         {
             var parts = new List<string>(virtualPath.Split('/', '\\'));
