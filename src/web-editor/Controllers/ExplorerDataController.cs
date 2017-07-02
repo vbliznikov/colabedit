@@ -10,10 +10,11 @@ using Microsoft.Extensions.Options;
 using CollabEdit.Model;
 using CollabEdit.IO;
 using CollabEdit.Services;
+using CollabEdit.Filters;
 
 namespace CollabEdit.Controllers
 {
-    // [ExplorerActionFilter]
+    [ApiExceptionFilter()]
     [Route("api/explorer")]
     public class ExplorerDataController : Controller
     {
@@ -29,8 +30,7 @@ namespace CollabEdit.Controllers
 
         private void ValidateTargetPath(string path)
         {
-            if (string.IsNullOrEmpty(path))
-                ModelState.AddModelError(apiErrorKey, "'targetPath' is required and should be provided in request URI");
+            if (string.IsNullOrEmpty(path)) return;
 
             var parts = path.Split('/');
             if (!parts[0].Equals(_pathMap.VirtualRoot, StringComparison.OrdinalIgnoreCase))
@@ -41,7 +41,7 @@ namespace CollabEdit.Controllers
         {
             if (paramValue == null || (paramValue is string && string.IsNullOrEmpty(paramName as string)))
                 ModelState.AddModelError(apiErrorKey,
-                    string.Format("'{0}' is required and should be provided in json body", paramName));
+                    string.Format("'{0}' is required and should be provided.", paramName));
         }
 
         private string NormalizeTargetPath(string vPath)
@@ -52,6 +52,10 @@ namespace CollabEdit.Controllers
         [HttpGet("folder/{*targetPath}", Name = "GetFolder")]
         public IActionResult GetFolderContent([FromRoute] string targetPath)
         {
+            ValidateRequired(targetPath, nameof(targetPath));
+            if (!ModelState.IsValid)
+                return new BadRequestObjectResult(ModelState);
+
             targetPath = NormalizeTargetPath(targetPath);
             ValidateTargetPath(targetPath);
             if (!ModelState.IsValid)
@@ -75,6 +79,10 @@ namespace CollabEdit.Controllers
         [HttpPost("folder/{*targetPath}", Name = "CreateFolder")]
         public IActionResult CreateFolder([FromRoute] string targetPath, [FromBody] string name)
         {
+            ValidateRequired(targetPath, nameof(targetPath));
+            if (!ModelState.IsValid)
+                return new BadRequestObjectResult(ModelState);
+
             targetPath = NormalizeTargetPath(targetPath);
             ValidateTargetPath(targetPath);
             ValidateRequired(name);
@@ -100,6 +108,10 @@ namespace CollabEdit.Controllers
         [HttpDelete("file/{*targetPath}", Name = "DeleteFolder")]
         public IActionResult DeleteFolder([FromRoute] string targetPath)
         {
+            ValidateRequired(targetPath, nameof(targetPath));
+            if (!ModelState.IsValid)
+                return new BadRequestObjectResult(ModelState);
+
             targetPath = NormalizeTargetPath(targetPath);
             ValidateTargetPath(targetPath);
             if (!ModelState.IsValid)
@@ -119,6 +131,10 @@ namespace CollabEdit.Controllers
         [HttpDelete("folder/{*targetPath}", Name = "DeleteFileSystemObjects")]
         public IActionResult DeleteFileSystemObjects([FromRoute] string targetPath, [FromBody] FileSystemInfoDto[] entries)
         {
+            ValidateRequired(targetPath, nameof(targetPath));
+            if (!ModelState.IsValid)
+                return new BadRequestObjectResult(ModelState);
+
             targetPath = NormalizeTargetPath(targetPath);
             ValidateTargetPath(targetPath);
             ValidateRequired(entries, "entries");
@@ -182,6 +198,10 @@ namespace CollabEdit.Controllers
         [HttpGet("file/{*targetPath}", Name = "GetFile")]
         public IActionResult GetFileContent([FromRoute] string targetPath)
         {
+            ValidateRequired(targetPath, nameof(targetPath));
+            if (!ModelState.IsValid)
+                return new BadRequestObjectResult(ModelState);
+
             targetPath = NormalizeTargetPath(targetPath);
             ValidateTargetPath(targetPath);
             if (!ModelState.IsValid)
@@ -198,6 +218,10 @@ namespace CollabEdit.Controllers
         [HttpPost("file/{*targetPath}", Name = "CreateFile")]
         public IActionResult Createfile([FromRoute] string targetPath, [FromBody] string name)
         {
+            ValidateRequired(targetPath, nameof(targetPath));
+            if (!ModelState.IsValid)
+                return new BadRequestObjectResult(ModelState);
+
             targetPath = NormalizeTargetPath(targetPath);
             ValidateTargetPath(targetPath);
             ValidateRequired(name);
@@ -225,9 +249,13 @@ namespace CollabEdit.Controllers
         [HttpPut("file/{*targetPath}", Name = "UpdateFile")]
         public async Task<IActionResult> UpdateFileContent([FromRoute] string targetPath, [FromBody] FileSystemInfoDto fsEntry)
         {
+            ValidateRequired(targetPath, nameof(targetPath));
+            if (!ModelState.IsValid)
+                return new BadRequestObjectResult(ModelState);
+
             targetPath = NormalizeTargetPath(targetPath);
             ValidateTargetPath(targetPath);
-            ValidateRequired(fsEntry, "fsEntry");
+            ValidateRequired(fsEntry, nameof(fsEntry));
             if (!ModelState.IsValid)
                 return new BadRequestObjectResult(ModelState);
 
@@ -245,6 +273,10 @@ namespace CollabEdit.Controllers
         [HttpDelete("file/{*targetPath}", Name = "DeleteFile")]
         public IActionResult DeleteFile([FromRoute] string targetPath)
         {
+            ValidateRequired(targetPath, nameof(targetPath));
+            if (!ModelState.IsValid)
+                return new BadRequestObjectResult(ModelState);
+
             targetPath = NormalizeTargetPath(targetPath);
             ValidateTargetPath(targetPath);
             if (!ModelState.IsValid)
