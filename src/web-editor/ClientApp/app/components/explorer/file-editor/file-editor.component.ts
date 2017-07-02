@@ -1,5 +1,6 @@
 
-import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, Input, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { OnChanges, SimpleChanges } from '@angular/core';
 
 @Component({
     selector: 'file-editor',
@@ -7,10 +8,11 @@ import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
     styleUrls: ['file-editor.component.css', '../toolbar.css']
 })
 
-export class FileEditorComponent implements OnInit, AfterViewInit {
-    public sourceText: string = 'some initial text';
+export class FileEditorComponent implements OnInit, OnChanges, AfterViewInit {
+    @Input()
+    public content: string = 'some initial text';
     @ViewChild('editor') editorElement;
-    private aceEditor: any;
+    private aceEditor: AceAjax.Editor;
 
     constructor() { }
 
@@ -18,10 +20,20 @@ export class FileEditorComponent implements OnInit, AfterViewInit {
 
     }
 
+    ngOnChanges(changes: SimpleChanges): void {
+        if (!this.aceEditor) return;
+
+        if (changes["content"]) {
+            const text = changes["content"].currentValue;
+            this.aceEditor.getSession().getDocument().setValue(text);
+        }
+    }
+
     ngAfterViewInit() {
         let editor = ace.edit('editor');
         editor.setFontSize("1em");
-        editor.getSession().getDocument().setValue(this.sourceText);
+        editor.getSession().getDocument().setValue(this.content);
+        editor.$blockScrolling = Infinity;
 
         this.aceEditor = editor;
     }

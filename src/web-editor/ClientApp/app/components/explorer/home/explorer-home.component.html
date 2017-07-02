@@ -8,7 +8,7 @@
         </div>
         <div splitHandle [left]="navigationBar" [right]="editorArea" [minWidth]="200" class="handle-bar"></div>
         <div #editorArea class="editor-area">
-            <file-editor></file-editor>
+            <file-editor [content]="fileContent"></file-editor>
         </div>
     </div>
 </div>

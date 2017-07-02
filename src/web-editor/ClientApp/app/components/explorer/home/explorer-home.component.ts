@@ -1,37 +1,44 @@
 
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router'
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
+import "rxjs/add/operator/map";
+import "rxjs/add/operator/switchMap";
+
 import { ToastrService } from 'ngx-toastr';
 
 import { FileSystemInfo, PathInfo, Link } from '../model';
-import { PathMapService } from '../services/path-map.service';
+import { PathMapService, ExplorerDataService } from '../services';
 
 @Component({
     templateUrl: 'explorer-home.component.html',
     styleUrls: ['explorer-home.component.css'],
-    providers: [PathMapService]
+    providers: [PathMapService, ExplorerDataService]
 })
 
 export class ExplorerHomeComponent implements OnInit {
     readonly basePath = '/explorer';
     public breadcrumbs: Link[] = [];
     public folderContent: FileSystemInfo[];
+    public fileContent: string = "";
     public currentPath: FileSystemInfo;
     private fileSystemEntry$: Observable<FileSystemInfo>;
 
-    constructor(private pathMapService: PathMapService, private router: Router, private activeRoute: ActivatedRoute,
-        private toastr: ToastrService) { }
+    constructor(private pathMapService: PathMapService, private explorerService: ExplorerDataService,
+        private router: Router, private activeRoute: ActivatedRoute, private toastr: ToastrService) { }
 
     ngOnInit() {
         console.log('Explorer::Init');
         this.fileSystemEntry$ = this.pathMapService.getFsEntryFromUrl();
-        this.fileSystemEntry$.subscribe((value) => {
-            console.log(`Current fsEntry='${value}'`);
-            this.currentPath = value;
-            this.breadcrumbs = this.getBreadCrumbs(value);
-            this.folderContent = this.getFolderContent(value);
-        });
+        this.fileSystemEntry$
+            .switchMap((value) => {
+                console.log(`Current fsEntry='${value}'`);
+                this.currentPath = value;
+                this.breadcrumbs = this.getBreadCrumbs(value);
+                const folderEntry = value.isFile ? value.parent : value;
+                return this.explorerService.getFolderContent(folderEntry)
+            })
+            .subscribe((list) => this.folderContent = list);
     }
 
     private onActivateFsEntry(entry: FileSystemInfo) {
@@ -39,8 +46,8 @@ export class ExplorerHomeComponent implements OnInit {
 
         if (entry.isFile) {
             // Open in Editor
-            // const currentfolderPath = this.currentPath.isFile ? this.currentPath.parent.name : this.currentPath.name;
-            // this.router.navigate([`../${currentfolderPath}`], { queryParams: { 'file': entry.name }, relativeTo: this.activeRoute })
+            this.explorerService.getFileContent(entry)
+                .subscribe(value => this.fileContent = value);
         } else
             this.router.navigate([entry.name], { relativeTo: this.activeRoute });
 
