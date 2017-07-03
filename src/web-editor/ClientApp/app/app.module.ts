@@ -7,7 +7,10 @@ import { ToastrModule } from 'ngx-toastr';
 
 
 import { AppComponent, HomeComponent, NotFoundComponent, TopMenuComponent } from './components'
-import { ExplorerHomeComponent, FileEditorComponent, FileExplorerComponent, BreadcrumbsComponent, SplitHandleDirective } from './components/explorer';
+import {
+    ExplorerHomeComponent, FileEditorComponent, FileExplorerComponent, BreadcrumbsComponent,
+    SplitHandleDirective, WatchNotifyDirective
+} from './components/explorer';
 import { FetchDataComponent } from './components/fetchdata/fetchdata.component';
 import { CounterComponent } from './components/counter/counter.component';
 
@@ -23,6 +26,7 @@ import { CounterComponent } from './components/counter/counter.component';
         FileExplorerComponent,
         BreadcrumbsComponent,
         SplitHandleDirective,
+        WatchNotifyDirective,
         CounterComponent,
         FetchDataComponent
     ],

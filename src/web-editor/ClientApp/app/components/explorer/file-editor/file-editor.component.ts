@@ -2,10 +2,13 @@
 import { Component, Input, OnInit, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
 import { OnChanges, SimpleChanges } from '@angular/core';
 
+import { WatchNotifyService } from './watch-notify.service';
+
 @Component({
     selector: 'file-editor',
     templateUrl: 'file-editor.component.html',
-    styleUrls: ['file-editor.component.css', '../toolbar.css']
+    styleUrls: ['file-editor.component.css', '../toolbar.css'],
+    providers: [WatchNotifyService]
 })
 
 export class FileEditorComponent implements OnInit, OnChanges, AfterViewInit {
@@ -14,7 +17,7 @@ export class FileEditorComponent implements OnInit, OnChanges, AfterViewInit {
     @ViewChild('editor') editorElement: ElementRef;
     private aceEditor: AceAjax.Editor;
 
-    constructor() { }
+    constructor(private watcherService: WatchNotifyService) { }
 
     ngOnInit() {
 
@@ -36,5 +39,6 @@ export class FileEditorComponent implements OnInit, OnChanges, AfterViewInit {
         editor.$blockScrolling = Infinity;
 
         this.aceEditor = editor;
+        this.watcherService.editorInitComplete(editor);
     }
 }
