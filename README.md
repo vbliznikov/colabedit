@@ -19,3 +19,15 @@ For simplicity there will be flat file structure without folders, which might be
 1. Backend should be implemented using .Net
 1. Frontend technologies might be whatever would appropriate
 1. Solution should work in major versions of modern browsers... or whatever reasonable restrictions will come into play.
+
+## Instalation instructions
+1. Clone repository: `git clone git@github.com:vbliznikov/colabedit.git`
+1. Install npm dependencies: `cd src/web-editor`, `yarn` or `npm install`. _(should be run inside src/web-editor)_
+1. Generate vendor bundle with all dependencies: `npm run update-vendor-bundle`.  _(should be run inside src/web-editor)_
+1. Restore nuget packages: `dotnet restore`.  _(should be run inside src/web-editor)_
+1. Run dev server: `dotnet run` | `dotnet watch run`.  _(should be run inside src/web-editor)_
+
+## Backend tests
+1. Go to tests folder `cd src/web-editor.test`
+1. Restore nuget packages: `dotnet restore`. _(should be run inside src/web-editor.test)_
+1. Run tests: `dotnet test` | `dotnet watch test`. _(should be run inside src/web-editor.test)_
