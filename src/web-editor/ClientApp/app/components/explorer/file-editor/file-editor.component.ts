@@ -1,5 +1,5 @@
 
-import { Component, Input, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, Input, OnInit, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
 import { OnChanges, SimpleChanges } from '@angular/core';
 
 @Component({
@@ -11,7 +11,7 @@ import { OnChanges, SimpleChanges } from '@angular/core';
 export class FileEditorComponent implements OnInit, OnChanges, AfterViewInit {
     @Input()
     public content: string = 'some initial text';
-    @ViewChild('editor') editorElement;
+    @ViewChild('editor') editorElement: ElementRef;
     private aceEditor: AceAjax.Editor;
 
     constructor() { }
@@ -30,7 +30,7 @@ export class FileEditorComponent implements OnInit, OnChanges, AfterViewInit {
     }
 
     ngAfterViewInit() {
-        let editor = ace.edit('editor');
+        let editor = ace.edit(this.editorElement.nativeElement);
         editor.setFontSize("1em");
         editor.getSession().getDocument().setValue(this.content);
         editor.$blockScrolling = Infinity;
