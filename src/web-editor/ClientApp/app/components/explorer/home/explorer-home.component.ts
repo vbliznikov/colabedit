@@ -7,8 +7,9 @@ import "rxjs/add/operator/switchMap";
 
 import { ToastrService } from 'ngx-toastr';
 
-import { FileSystemInfo, PathInfo, Link } from '../model';
+import { FileSystemInfo, PathInfo, Link, ServerActionResponse } from '../model';
 import { PathMapService, ExplorerDataService } from '../services';
+import { ItemActionRequest, MultiActionRequest } from '../file-explorer/file-explorer.component';
 
 @Component({
     templateUrl: 'explorer-home.component.html',
@@ -48,9 +49,53 @@ export class ExplorerHomeComponent implements OnInit {
             // Open in Editor
             this.explorerService.getFileContent(entry)
                 .subscribe(value => this.fileContent = value);
-        } else
-            this.router.navigate([entry.name], { relativeTo: this.activeRoute });
+        } else {
+            this.explorerService.folderExists(entry).subscribe((result) => {
+                if (result)
+                    this.router.navigate([entry.name], { relativeTo: this.activeRoute })
+                else {
+                    this.toastr.error(`Folder '${entry.path}' does not exists`);
+                    console.log("Refreshing current content.");
+                    this.explorerService.getFolderContent(this.currentPath)
+                        .subscribe(list => this.folderContent = list);
+                }
+            });
+        }
 
+    }
+
+    private onNewFsEntry(request: ItemActionRequest<FileSystemInfo>) {
+        console.log(`ExplorerHome::onNewEntry ${request.item}`)
+        let fullPath = this.currentPath.path.concat(request.item.name);
+        let newItem = new FileSystemInfo(fullPath, request.item.isFile);
+
+        this.explorerService.createFileSystemObject(newItem)
+            .subscribe(item => {
+                request.item = item;
+                request.complete();
+            });
+    }
+
+    private onItemsDelete(request: MultiActionRequest<FileSystemInfo>) {
+        console.log(`ExplorerHome::onItemsDelte ${request.requestItems.length}`);
+        var fsEntries = request.requestItems.map(value => value.item);
+
+        this.explorerService.deleteFileSystemObjects(this.currentPath.path, fsEntries)
+            .subscribe(response => {
+                response
+                    .map(responseItem => {
+                        var actionRequest = new ItemActionRequest<FileSystemInfo>(responseItem.entity);
+                        actionRequest.cancel = responseItem.status != 200;
+
+                        return actionRequest;
+                    })
+                    .filter(requestItem => requestItem.cancel)
+                    .forEach((resultItem) => {
+                        let originRequestItem = request.requestItems.find(originItem => originItem.item.name === resultItem.item.name)
+                        if (originRequestItem) originRequestItem.cancel = true;
+                    });
+                request.complete();
+            });
     }
 
     private getFolderContent(fsInfo: FileSystemInfo): FileSystemInfo[] {

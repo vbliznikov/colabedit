@@ -77,7 +77,7 @@ namespace CollabEdit.Controllers
         }
 
         [HttpPost("folder/{*targetPath}", Name = "CreateFolder")]
-        public IActionResult CreateFolder([FromRoute] string targetPath, [FromBody] string name)
+        public IActionResult CreateFolder([FromRoute] string targetPath, [FromForm] string name)
         {
             ValidateRequired(targetPath, nameof(targetPath));
             if (!ModelState.IsValid)
@@ -155,7 +155,7 @@ namespace CollabEdit.Controllers
                     {
                         Entity = fsObject,
                         Status = ActionStatusResult.ClientFauilure,
-                        Errros = new string[1] { "'name' may not be null or empty string" }
+                        Errors = new string[1] { "'name' may not be null or empty string" }
                     }
                     );
                     continue;
@@ -216,7 +216,7 @@ namespace CollabEdit.Controllers
         }
 
         [HttpPost("file/{*targetPath}", Name = "CreateFile")]
-        public IActionResult Createfile([FromRoute] string targetPath, [FromBody] string name)
+        public IActionResult Createfile([FromRoute] string targetPath, [FromForm] string name)
         {
             ValidateRequired(targetPath, nameof(targetPath));
             if (!ModelState.IsValid)

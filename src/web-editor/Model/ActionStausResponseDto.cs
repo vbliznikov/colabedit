@@ -10,11 +10,11 @@ namespace CollabEdit.Model
             Entity = entity;
             Status = result;
             if (ex != null)
-                Errros = new string[] { ex.Message };
+                Errors = new string[] { ex.Message };
         }
         public T Entity { get; set; }
         public ActionStatusResult Status { get; set; }
-        public string[] Errros { get; set; }
+        public string[] Errors { get; set; }
     }
 
     public enum ActionStatusResult

@@ -12,7 +12,7 @@ import { Link, FileSystemInfo, PathInfo } from '../model';
 export class FileExplorerComponent implements OnInit {
     @Input() items: FileSystemInfo[];
     @Output() itemActivate: EventEmitter<FileSystemInfo> = new EventEmitter();
-    @Output() itemsDelete: EventEmitter<ItemActionRequest<FileSystemInfo>[]> = new EventEmitter();
+    @Output() itemsDelete: EventEmitter<MultiActionRequest<FileSystemInfo>> = new EventEmitter();
     @Output() newItem: EventEmitter<ItemActionRequest<FileSystemInfo>> = new EventEmitter();
     public selectedIndexes: Set<number> = new Set();
 
@@ -24,7 +24,10 @@ export class FileExplorerComponent implements OnInit {
     @ViewChild('listItems') listItemsContainer: ElementRef;
     private waitingNewItemInput = false;
 
-    constructor() { }
+    constructor() {
+        this.onNewItemRequestCompleted = this.onNewItemRequestCompleted.bind(this);
+        this.OnDeleteRequestCompleted = this.OnDeleteRequestCompleted.bind(this);
+    }
 
     ngOnInit() {
     }
@@ -60,9 +63,11 @@ export class FileExplorerComponent implements OnInit {
     private onDeleteRequest() {
         // TODO: Delete confirmation request
         const itemsDeleteRequest = this.selectedItems
-            .map((value) => new ItemActionRequest(value, false));
-        this.itemsDelete.emit(itemsDeleteRequest);
+            .map((value) => new ItemActionRequest(value));
+        this.itemsDelete.emit(new MultiActionRequest(itemsDeleteRequest, this.OnDeleteRequestCompleted));
+    }
 
+    private OnDeleteRequestCompleted(itemsDeleteRequest: ItemActionRequest<FileSystemInfo>[]) {
         const idexes2Delete = itemsDeleteRequest
             .filter(request => !request.cancel)
             .map(request => this.items.indexOf(request.item))
@@ -149,10 +154,11 @@ export class FileExplorerComponent implements OnInit {
 
     private onNewItem(fsEntry: FileSystemInfo) {
         // Generate event
-        const newItemRequest = new ItemActionRequest(fsEntry, false);
+        const newItemRequest = new ItemActionRequest(fsEntry, this.onNewItemRequestCompleted);
         this.newItem.emit(newItemRequest);
-        if (newItemRequest.cancel) return;
+    }
 
+    private onNewItemRequestCompleted(fsEntry: FileSystemInfo) {
         // try to find position of item which is greater then new Item
         let itemIndex = this.items.findIndex((item) => {
             if (FileSystemInfo.ascComparer(fsEntry, item) <= 0)
@@ -249,5 +255,21 @@ export class FileExplorerComponent implements OnInit {
 
 export class ItemActionRequest<T> {
     reason: string;
-    constructor(public item: T, public cancel: boolean) { }
+    cancel: boolean
+
+    constructor(public item: T, private callback?: any) {
+    }
+
+    complete() {
+        if (this.callback) this.callback(this.item);
+    }
+}
+
+export class MultiActionRequest<T> {
+
+    constructor(public requestItems: ItemActionRequest<T>[], private callback?: any) { }
+
+    complete() {
+        if (this.callback) this.callback(this.requestItems);
+    }
 }
