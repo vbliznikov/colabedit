@@ -24,7 +24,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Web;
+using System.Net;
 
 namespace DiffMatchPatch {
   internal static class CompatibilityExtensions {
@@ -170,8 +170,7 @@ namespace DiffMatchPatch {
             break;
         }
 
-        text.Append(HttpUtility.UrlEncode(aDiff.text,
-            new UTF8Encoding()).Replace('+', ' ')).Append("\n");
+        text.Append(Web​Utility.UrlEncode(aDiff.text).Replace('+', ' ')).Append("\n");
       }
 
       return diff_match_patch.unescapeForEncodeUriCompatability(
@@ -1432,8 +1431,7 @@ namespace DiffMatchPatch {
       foreach (Diff aDiff in diffs) {
         switch (aDiff.operation) {
           case Operation.INSERT:
-            text.Append("+").Append(HttpUtility.UrlEncode(aDiff.text,
-                new UTF8Encoding()).Replace('+', ' ')).Append("\t");
+            text.Append("+").Append(Web​Utility.UrlEncode(aDiff.text).Replace('+', ' ')).Append("\t");
             break;
           case Operation.DELETE:
             text.Append("-").Append(aDiff.text.Length).Append("\t");
@@ -1478,7 +1476,7 @@ namespace DiffMatchPatch {
             // decode would change all "+" to " "
             param = param.Replace("+", "%2b");
 
-            param = HttpUtility.UrlDecode(param, new UTF8Encoding(false, true));
+            param = Web​Utility.UrlDecode(param);
             //} catch (UnsupportedEncodingException e) {
             //  // Not likely on modern system.
             //  throw new Error("This system does not support UTF-8.", e);
@@ -2253,7 +2251,7 @@ namespace DiffMatchPatch {
           }
           line = text[textPointer].Substring(1);
           line = line.Replace("+", "%2b");
-          line = HttpUtility.UrlDecode(line, new UTF8Encoding(false, true));
+          line = Web​Utility.UrlDecode(line);
           if (sign == '-') {
             // Deletion.
             patch.diffs.Add(new Diff(Operation.DELETE, line));
@@ -2283,7 +2281,7 @@ namespace DiffMatchPatch {
      * receiving application will certainly decode these fine.
      * Note that this function is case-sensitive.  Thus "%3F" would not be
      * unescaped.  But this is ok because it is only called with the output of
-     * HttpUtility.UrlEncode which returns lowercase hex.
+     * Web​Utility.UrlEncode which returns lowercase hex.
      *
      * Example: "%3f" -> "?", "%24" -> "$", etc.
      *
