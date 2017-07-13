@@ -12,7 +12,7 @@ namespace VersionControl.Tests
         [Test]
         public void RepositoryBranch_Test_EmtyBranch_HasEmptyHistory()
         {
-            var repository = new RepositoryBranch<string>();
+            var repository = new RepositoryBranch<string, string>();
 
             Assert.That(repository.Head == null);
             Assert.That(repository.GetHistory().Count() == 0, "Empty repository should have zero length history");
@@ -21,7 +21,7 @@ namespace VersionControl.Tests
         [Test]
         public void RepositoryBranch_Test_CommitOperation()
         {
-            var repository = new RepositoryBranch<string>();
+            var repository = new RepositoryBranch<string, string>();
             Assert.That(repository.Head == null);
 
             var commit = repository.Commit(string.Empty, string.Empty);
@@ -39,7 +39,7 @@ namespace VersionControl.Tests
         [Test]
         public void RepositoryBranch_Test_CommitTheSameValue()
         {
-            var repository = new RepositoryBranch<string>();
+            var repository = new RepositoryBranch<string, string>();
             const string value = "some string";
             var valueChars = new char[value.Length];
             value.CopyTo(0, valueChars, 0, value.Length);

@@ -1,42 +1,50 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace VersionControl
 {
 
-    public class RepositoryBranch<T>
+    public class RepositoryBranch<TValue, TMeta>
     {
+        private object syncRoot = new Object();
         public RepositoryBranch() { }
 
-        public RepositoryBranch(string name, Commit<T> head)
+        public RepositoryBranch(string name, Repository<TValue, TMeta> repository, Commit<TValue, TMeta> head)
         {
+            if (string.IsNullOrEmpty(name)) throw new ArgumentException("Name may not be null or empty string.");
+            if (repository == null) throw new ArgumentNullException(nameof(repository));
+
             Name = name;
+            Repository = repository;
             Head = head;
         }
 
+        public Repository<TValue, TMeta> Repository { get; }
+
         public string Name { get; }
 
-        public Commit<T> Head { get; protected set; }
+        public Commit<TValue, TMeta> Head { get; protected set; }
 
-        public Commit<T> Commit(T value, string comment)
+        public Commit<TValue, TMeta> Commit(TValue value, TMeta metadata)
         {
             if (Head != null && Head.Value.Equals(value))
                 return Head; // Value was not changed, so no need to create a new version.
 
-            var commit = new Commit<T>(value, new CommitMetadata(comment), Head);
-            Head = commit;
-            return commit;
+            lock (syncRoot)
+            {
+                var commit = new Commit<TValue, TMeta>(value, metadata, Head);
+                Head = commit;
+                return commit;
+            }
         }
 
-        public RepositoryBranch<T> BranchFrom(string name, Commit<T> commit)
+        public Commit<TValue, TMeta> MergeWith(RepositoryBranch<TValue, TMeta> sourceBranch)
         {
-            if (string.IsNullOrEmpty(name)) throw new ArgumentException("Name may not be null or empty string.");
-            if (commit == null) throw new ArgumentNullException(nameof(commit));
-
-            return new RepositoryBranch<T>(name, commit);
+            throw new NotImplementedException();
         }
 
-        public IEnumerable<Commit<T>> GetHistory()
+        public IEnumerable<Commit<TValue, TMeta>> GetHistory()
         {
             if (Head == null) yield break;
 

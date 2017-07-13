@@ -3,29 +3,29 @@ using System.Text;
 
 namespace VersionControl
 {
-    public class Commit<T> : IEquatable<Commit<T>>
+    public class Commit<TValue, TMeta> : IEquatable<Commit<TValue, TMeta>>
     {
-        internal Commit(T value, CommitMetadata metadata, params Commit<T>[] parents)
+        internal Commit(TValue value, TMeta metadata, params Commit<TValue, TMeta>[] parents)
         {
             if (value == null) throw new ArgumentException("Value may not be null");
             Value = value;
-            Metadata = metadata ?? CommitMetadata.Default;
+            Metadata = metadata;
             Parent = parents.Length > 0 ? parents[0] : null;
 
             var mergeLength = parents.Length > 0 ? parents.Length - 1 : 0;
-            MergeParents = new Commit<T>[mergeLength];
+            MergeParents = new Commit<TValue, TMeta>[mergeLength];
             if (mergeLength > 0)
                 for (int i = 1; i < parents.Length; i++)
                     MergeParents[i - 1] = parents[i];
         }
-        public Commit<T> Parent { get; internal set; }
-        public Commit<T>[] MergeParents { get; internal set; }
+        public Commit<TValue, TMeta> Parent { get; internal set; }
+        public Commit<TValue, TMeta>[] MergeParents { get; internal set; }
 
-        public T Value { get; internal set; }
+        public TValue Value { get; internal set; }
 
-        public CommitMetadata Metadata { get; internal set; }
+        public TMeta Metadata { get; internal set; }
 
-        public bool Equals(Commit<T> other)
+        public bool Equals(Commit<TValue, TMeta> other)
         {
             return other.GetHashCode() == this.GetHashCode();
         }
@@ -48,7 +48,7 @@ namespace VersionControl
             foreach (var parent in MergeParents)
                 builder.AppendFormat(";{0}", parent.GetHashCode());
             builder.Append("\n");
-            builder.AppendFormat("Comment:{0}\n", this.Metadata.Comment);
+            builder.AppendFormat("Metada:{0}\n", this.Metadata.ToString());
             builder.AppendFormat("Value:{0}", Value);
 
             builder.AppendLine();
