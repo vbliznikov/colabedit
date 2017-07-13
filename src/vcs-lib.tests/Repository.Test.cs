@@ -35,6 +35,23 @@ namespace VersionControl.Tests
             Assert.That(repository.GetHistory().Count() == 2, "Repository should contains exactly two commits at this point");
             Assert.That(repository.GetHistory().First().Equals(commit2), "History should starts from last commit");
         }
+
+        [Test]
+        public void Repository_Test_CommitTheSameValue()
+        {
+            var repository = new Repository<string>();
+            const string value = "some string";
+            var valueChars = new char[value.Length];
+            value.CopyTo(0, valueChars, 0, value.Length);
+            string theCopyValue = new String(valueChars);
+
+            var firstCommit = repository.Commit(value, string.Empty);
+            Assert.That(firstCommit != null, "Commit may not return null value");
+
+            var secondCommit = repository.Commit(theCopyValue, string.Empty);
+            Assert.That(firstCommit.Equals(secondCommit), "Commit of the current value should not produce new version");
+            Assert.That(firstCommit == secondCommit, "Commit of the current value should return the current commit instance");
+        }
     }
 
 }

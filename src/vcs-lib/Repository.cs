@@ -9,6 +9,9 @@ namespace VersionControl
 
         public Commit<T> Commit(T value, string comment)
         {
+            if (Head != null && Head.Value.Equals(value))
+                return Head; // Value was not changed, so no need to create a new version.
+
             var commit = new Commit<T>(value, new CommitMetadata(comment), Head);
             Head = commit;
             return commit;
