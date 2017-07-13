@@ -6,22 +6,22 @@ using Microsoft.Extensions.Logging;
 namespace VersionControl.Tests
 {
     [TestFixture]
-    public class TestRepository
+    public class TestRepositoryBranch
     {
 
         [Test]
-        public void Repositorty_Test_EmtyRepository_HasEmptyHistory()
+        public void RepositoryBranch_Test_EmtyBranch_HasEmptyHistory()
         {
-            var repository = new Repository<string>();
+            var repository = new RepositoryBranch<string>();
 
             Assert.That(repository.Head == null);
             Assert.That(repository.GetHistory().Count() == 0, "Empty repository should have zero length history");
         }
 
         [Test]
-        public void Repository_Test_CommitOperation()
+        public void RepositoryBranch_Test_CommitOperation()
         {
-            var repository = new Repository<string>();
+            var repository = new RepositoryBranch<string>();
             Assert.That(repository.Head == null);
 
             var commit = repository.Commit(string.Empty, string.Empty);
@@ -37,9 +37,9 @@ namespace VersionControl.Tests
         }
 
         [Test]
-        public void Repository_Test_CommitTheSameValue()
+        public void RepositoryBranch_Test_CommitTheSameValue()
         {
-            var repository = new Repository<string>();
+            var repository = new RepositoryBranch<string>();
             const string value = "some string";
             var valueChars = new char[value.Length];
             value.CopyTo(0, valueChars, 0, value.Length);
