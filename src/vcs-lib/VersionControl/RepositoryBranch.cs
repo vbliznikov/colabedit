@@ -39,7 +39,7 @@ namespace VersionControl
             }
         }
 
-        public Commit<TValue, TMeta> MergeWith(RepositoryBranch<TValue, TMeta> sourceBranch)
+        public virtual Commit<TValue, TMeta> MergeWith(RepositoryBranch<TValue, TMeta> sourceBranch)
         {
             throw new NotImplementedException();
         }
