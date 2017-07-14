@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-namespace VersionControl
+namespace CollabEdit.VersionControl
 {
     public class Repository<TValue, TMeta>
     {

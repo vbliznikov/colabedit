@@ -1,7 +1,7 @@
 using System;
 using NUnit.Framework;
 
-namespace VersionControl.Tests
+namespace CollabEdit.VersionControl.Tests
 {
     [TestFixture]
     public class TestCommitMetadata

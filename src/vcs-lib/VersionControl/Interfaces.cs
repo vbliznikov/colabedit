@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace VersionControl
+namespace CollabEdit.VersionControl
 {
     /// <summary>
     /// Represents the Repository of TValue values stored with TMeta metadata

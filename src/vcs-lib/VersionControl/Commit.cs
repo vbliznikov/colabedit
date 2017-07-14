@@ -1,7 +1,7 @@
 using System;
 using System.Text;
 
-namespace VersionControl
+namespace CollabEdit.VersionControl
 {
     public class Commit<TValue, TMeta> : IEquatable<Commit<TValue, TMeta>>
     {

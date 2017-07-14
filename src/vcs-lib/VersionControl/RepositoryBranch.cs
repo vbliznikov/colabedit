@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 
-namespace VersionControl
+namespace CollabEdit.VersionControl
 {
 
     public class RepositoryBranch<TValue, TMeta>

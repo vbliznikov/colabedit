@@ -1,6 +1,6 @@
 using System;
 
-namespace VersionControl
+namespace CollabEdit.VersionControl
 {
     public class CommitMetadata : IEquatable<CommitMetadata>
     {

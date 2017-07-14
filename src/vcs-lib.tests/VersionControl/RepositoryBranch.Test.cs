@@ -3,7 +3,7 @@ using NUnit.Framework;
 using System.Linq;
 using Microsoft.Extensions.Logging;
 
-namespace VersionControl.Tests
+namespace CollabEdit.VersionControl.Tests
 {
     [TestFixture]
     public class TestRepositoryBranch
