@@ -2,6 +2,8 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 
+using CollabEdit.VersionControl.Operations;
+
 namespace CollabEdit.VersionControl
 {
     public class DictionaryMergeHandler<TKey, TValue> : IMergeHandler<IDictionary<TKey, TValue>>
@@ -14,35 +16,30 @@ namespace CollabEdit.VersionControl
 
             var mergedDictionary = new Dictionary<TKey, TValue>();
 
-            var commonKeys = new HashSet<TKey>(origin.Keys);
-            commonKeys.IntersectWith(left.Keys);
-            commonKeys.IntersectWith(right.Keys);
+            var lEditScript = KeysEditScript<TKey>.From(origin.Keys, left.Keys);
+            var rEditScript = KeysEditScript<TKey>.From(origin.Keys, right.Keys);
+            var resultScript = lEditScript.Merge(rEditScript);
 
-            // Deal with key insertion and deletion
-            var adLeft = left.Keys.Except(origin.Keys);
-            var adRight = right.Keys.Except(origin.Keys);
-
-
-            MergeCommonKeys(origin, left, right, mergedDictionary, commonKeys);
-
-            if (origin.Count == commonKeys.Count && left.Count == commonKeys.Count && right.Count == commonKeys.Count)
-                return mergedDictionary;
-
-            return mergedDictionary;
-        }
-
-        private static void MergeCommonKeys(IDictionary<TKey, TValue> commonBase, IDictionary<TKey, TValue> left,
-            IDictionary<TKey, TValue> right, Dictionary<TKey, TValue> mergedDictionary, HashSet<TKey> commonKeys)
-        {
-            foreach (var key in commonKeys)
+            foreach (TKey key in resultScript.CommonKeys)
             {
-                var origin = commonBase[key];
+                var originValue = origin[key];
                 var leftValue = left[key];
                 var rightValue = right[key];
 
-                var mergeValue = MergeUtils.Merge(origin, leftValue, rightValue);
-                mergedDictionary.Add(key, mergeValue);
+                var mergedValue = MergeUtils.Merge<TValue>(originValue, leftValue, rightValue);
+                mergedDictionary.Add(key, mergedValue);
             }
+
+            foreach (TKey key in resultScript.InsertedKeys)
+            {
+                var leftValue = left[key];
+                var rightValue = right[key];
+
+                var mergedValue = MergeUtils.Merge<TValue>(leftValue, rightValue);
+                mergedDictionary.Add(key, mergedValue);
+            }
+
+            return mergedDictionary;
         }
     }
 }
