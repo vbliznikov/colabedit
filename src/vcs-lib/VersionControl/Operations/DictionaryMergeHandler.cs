@@ -30,6 +30,16 @@ namespace CollabEdit.VersionControl.Operations
                 mergedDictionary.Add(key, mergedValue);
             }
 
+            // Inserted only left
+            var insLeft = lEditScript.InsertedKeys.Except(rEditScript.InsertedKeys);
+            foreach (var key in insLeft)
+                mergedDictionary.Add(key, left[key]);
+
+            //Inserted only right
+            var insRight = rEditScript.InsertedKeys.Except(lEditScript.InsertedKeys);
+            foreach (var key in insRight)
+                mergedDictionary.Add(key, right[key]);
+
             var commonInsertedKeys = lEditScript.InsertedKeys.Intersect(rEditScript.InsertedKeys);
             // Check that the same values was inserted, otherwise apply ConflictResolutionOptions
             foreach (TKey key in commonInsertedKeys)
