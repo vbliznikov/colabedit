@@ -42,9 +42,9 @@ namespace CollabEdit.VersionControl.Operations
             }
 
             var delConflictLeft = rEditScript.DeletedKeys.Intersect(lEditScript.CommonKeys)
-                .Where(key => !EqualityComparer<TKey>.Equals(origin[key], left[key]));
+                .Where(key => !MergeUtils.CompareEqual(origin[key], left[key]));
             var delConflictRight = lEditScript.DeletedKeys.Intersect(rEditScript.CommonKeys)
-                .Where(key => !EqualityComparer<TKey>.Equals(origin[key], right[key]));
+                .Where(key => !MergeUtils.CompareEqual(origin[key], right[key]));
 
             switch (options)
             {
@@ -57,7 +57,9 @@ namespace CollabEdit.VersionControl.Operations
                         mergedDictionary.Add(key, left[key]);
                     break;
                 default:
-                    throw new MergeOperationException(string.Format("The key[{0}] was deleted at right but was changed at left.", key));
+                    if (delConflictLeft.Count() > 0 || delConflictRight.Count() > 0)
+                        throw new MergeOperationException("There are some keys deleted  at one side and modified at other.");
+                    break;
             }
 
 

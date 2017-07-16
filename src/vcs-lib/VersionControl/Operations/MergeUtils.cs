@@ -1,3 +1,5 @@
+using System;
+
 namespace CollabEdit.VersionControl.Operations
 {
     public static class MergeUtils
@@ -5,16 +7,9 @@ namespace CollabEdit.VersionControl.Operations
         public static TValue Merge<TValue>(TValue origin, TValue left, TValue right,
             ConflictResolutionOptions options = ConflictResolutionOptions.RaiseException)
         {
-            if (left == null && right == null) return left;
-            if (origin == null)
-            {
-                if (left == null) return right;
-                if (right == null) return left;
-            }
-
-            if (left.Equals(right)) return left;
-            if (left.Equals(origin)) return right;
-            if (right.Equals(origin)) return left;
+            if (CompareEqual(left, right)) return right;
+            if (CompareEqual(origin, left)) return right;
+            if (CompareEqual(origin, right)) return left;
 
             return ResolveConflict<TValue>(left, right, options);
         }
@@ -22,20 +17,10 @@ namespace CollabEdit.VersionControl.Operations
         public static TValue Merge<TValue>(TValue left, TValue right,
             ConflictResolutionOptions options = ConflictResolutionOptions.RaiseException)
         {
-            if (left == null)
-            {
-                if (right == null)
-                    return right;
-                else
-                {
-                    return ResolveConflict<TValue>(left, right, options);
-                }
-            }
-
-            if (left.Equals(right))
+            if (CompareEqual(left, right))
                 return right;
             else
-                return ResolveConflict<TValue>(left, right, options);
+                return ResolveConflict(left, right, options);
         }
 
         public static TValue ResolveConflict<TValue>(TValue left, TValue right, ConflictResolutionOptions options)
@@ -49,6 +34,21 @@ namespace CollabEdit.VersionControl.Operations
                 default:
                     throw new MergeOperationException("There is conflicting change and no other resolution option was provided.");
             }
+        }
+
+        public static bool CompareEqual<T>(T left, T right)
+        {
+            if (left == null && right == null)
+                return true;
+            if (left == null && right != null)
+                return false;
+            if (right == null && left != null)
+                return false;
+
+            if (left is IEquatable<T>)
+                return ((IEquatable<T>)left).Equals(right);
+            else
+                return Object.Equals(left, right);
         }
     }
 }
