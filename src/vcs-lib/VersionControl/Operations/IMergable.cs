@@ -21,7 +21,7 @@ namespace CollabEdit.VersionControl.Operations
     /// </summary>
     public interface ITwoWayMergable<T>
     {
-        T Merge(T commonBase, T other);
+        T Merge(T origin, T other, ConflictResolutionOptions options);
     }
 
     /// <summary>
@@ -29,7 +29,7 @@ namespace CollabEdit.VersionControl.Operations
     /// </summary>
     public interface IMergeHandler<T>
     {
-        T Merge(T commonBase, T left, T right);
+        T Merge(T origin, T left, T right, ConflictResolutionOptions options);
     }
 
     /// <summary>
