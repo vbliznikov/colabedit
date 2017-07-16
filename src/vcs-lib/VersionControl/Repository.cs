@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
+using CollabEdit.VersionControl.Operations;
+
 namespace CollabEdit.VersionControl
 {
     public class Repository<TValue, TMeta>
@@ -12,7 +14,15 @@ namespace CollabEdit.VersionControl
         {
             CurrentBranch = new RepositoryBranch<TValue, TMeta>(defaultBranchName, this, null);
             _branches.Add(CurrentBranch.Name, CurrentBranch);
+            MergeHandler = new DumbMergehandler<TValue>();
         }
+        public Repository(IMergeHandler<TValue> mergeHandler) : this()
+        {
+            if (mergeHandler == null) throw new ArgumentNullException(nameof(mergeHandler));
+            MergeHandler = mergeHandler;
+        }
+
+        internal IMergeHandler<TValue> MergeHandler { get; }
 
         public RepositoryBranch<TValue, TMeta> CurrentBranch { get; protected set; }
 
