@@ -28,6 +28,9 @@ namespace CollabEdit.VersionControl
 
         public Commit<TValue, TMeta> Commit(TValue value, TMeta metadata)
         {
+            if (value == null) throw new ArgumentNullException(nameof(value));
+            if (metadata == null) throw new ArgumentException(nameof(metadata));
+
             if (Head != null && Head.Value.Equals(value))
                 return Head; // Value was not changed, so no need to create a new version.
 
