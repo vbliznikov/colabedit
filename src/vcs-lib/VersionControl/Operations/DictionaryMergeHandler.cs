@@ -2,9 +2,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 
-using CollabEdit.VersionControl.Operations;
-
-namespace CollabEdit.VersionControl
+namespace CollabEdit.VersionControl.Operations
 {
     public class DictionaryMergeHandler<TKey, TValue> : IMergeHandler<IDictionary<TKey, TValue>>
     {

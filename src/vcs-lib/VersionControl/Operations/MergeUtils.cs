@@ -1,4 +1,4 @@
-namespace CollabEdit.VersionControl
+namespace CollabEdit.VersionControl.Operations
 {
     public static class MergeUtils
     {

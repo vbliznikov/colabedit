@@ -1,4 +1,4 @@
-namespace CollabEdit.VersionControl
+namespace CollabEdit.VersionControl.Storage
 {
     public class ObjectPointer<T>
     {

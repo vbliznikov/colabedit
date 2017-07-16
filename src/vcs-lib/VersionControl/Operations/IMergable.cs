@@ -1,6 +1,6 @@
 using System;
 
-namespace CollabEdit.VersionControl
+namespace CollabEdit.VersionControl.Operations
 {
     /// <summary>
     /// Inreface for objects which may suppport simple merge operation
