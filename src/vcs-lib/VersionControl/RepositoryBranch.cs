@@ -70,11 +70,16 @@ namespace CollabEdit.VersionControl
                 TValue mergedValue = Repository.MergeHandler.Merge(commonAncestor.Value, Head.Value, sourceBranch.Head.Value,
                     ConflictResolutionOptions.RaiseException);
                 // TODO Find a more suitable solution for TMeta
-                TMeta meta = default(TMeta);
+                TMeta meta = GreateMergeMetadata(sourceBranch, commonAncestor);
                 var mergeCommit = new Commit<TValue, TMeta>(mergedValue, meta, Head, sourceBranch.Head);
                 Head = mergeCommit;
             }
             return Head;
+        }
+
+        protected virtual TMeta GreateMergeMetadata(RepositoryBranch<TValue, TMeta> branch, Commit<TValue, TMeta> commonAncestor)
+        {
+            return default(TMeta);
         }
 
         protected Commit<TValue, TMeta> FindCommonAcestor(Commit<TValue, TMeta> left, Commit<TValue, TMeta> right)

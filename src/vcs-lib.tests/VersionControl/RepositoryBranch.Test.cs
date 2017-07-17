@@ -52,6 +52,12 @@ namespace CollabEdit.VersionControl.Tests
             Assert.That(firstCommit.Equals(secondCommit), "Commit of the current value should not produce new version");
             Assert.That(firstCommit == secondCommit, "Commit of the current value should return the current commit instance");
         }
+
+        [Test]
+        public void RepositoryBranch_Test_Merge_EqualBranch()
+        {
+
+        }
     }
 
 }
