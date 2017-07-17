@@ -26,12 +26,12 @@ namespace CollabEdit.VersionControl.Tests
 
             var commit = repository.Commit(string.Empty, string.Empty);
             Assert.That(repository.Head.Equals(commit), "Repo should poit to the last commit");
-            Assert.That(commit.Parent == null, "First commit should not have any parents");
+            Assert.That(commit.Previous == null, "First commit should not have any parents");
 
             var commit2 = repository.Commit("other", string.Empty);
             Assert.That(repository.Head.Equals(commit2), "Repo should poit to the last commit");
-            Assert.That(commit2.Parent != null, "New commit should point to previous one");
-            Assert.That(commit2.Parent.Equals(commit), "New commit should point to previous one");
+            Assert.That(commit2.Previous != null, "New commit should point to previous one");
+            Assert.That(commit2.Previous.Equals(commit), "New commit should point to previous one");
             Assert.That(repository.GetHistory().Count() == 2, "Repository should contains exactly two commits at this point");
             Assert.That(repository.GetHistory().First().Equals(commit2), "History should starts from last commit");
         }

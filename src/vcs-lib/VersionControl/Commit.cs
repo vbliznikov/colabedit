@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace CollabEdit.VersionControl
@@ -10,16 +12,11 @@ namespace CollabEdit.VersionControl
             if (value == null) throw new ArgumentException("Value may not be null");
             Value = value;
             Metadata = metadata;
-            Parent = parents.Length > 0 ? parents[0] : null;
-
-            var mergeLength = parents.Length > 0 ? parents.Length - 1 : 0;
-            MergeParents = new Commit<TValue, TMeta>[mergeLength];
-            if (mergeLength > 0)
-                for (int i = 1; i < parents.Length; i++)
-                    MergeParents[i - 1] = parents[i];
+            Previous = parents.Length > 0 ? parents[0] : null;
+            Parents = parents.Where(element => element != null);
         }
-        public Commit<TValue, TMeta> Parent { get; internal set; }
-        public Commit<TValue, TMeta>[] MergeParents { get; internal set; }
+        public Commit<TValue, TMeta> Previous { get; internal set; }
+        public IEnumerable<Commit<TValue, TMeta>> Parents { get; internal set; }
 
         public TValue Value { get; internal set; }
 
@@ -33,9 +30,9 @@ namespace CollabEdit.VersionControl
         override public int GetHashCode()
         {
             int hashCode = Value.GetHashCode() ^ Metadata.GetHashCode();
-            if (Parent != null)
-                hashCode ^= Parent.GetHashCode();
-            foreach (var parent in MergeParents)
+            // if (Previous != null)
+            //     hashCode ^= Previous.GetHashCode();
+            foreach (var parent in Parents)
                 hashCode ^= parent.GetHashCode();
             return hashCode;
         }
@@ -44,9 +41,14 @@ namespace CollabEdit.VersionControl
         {
             var builder = new StringBuilder();
             builder.AppendFormat("id: {0}\n", GetHashCode());
-            builder.AppendFormat("parents: {0}", Parent != null ? Parent.GetHashCode().ToString() : "");
-            foreach (var parent in MergeParents)
-                builder.AppendFormat(";{0}", parent.GetHashCode());
+            builder.Append("parents: ");
+            bool first = true;
+            foreach (var parent in Parents)
+            {
+                if (!first) builder.Append(";");
+                builder.AppendFormat("{0}", parent.GetHashCode());
+                first = false;
+            }
             builder.Append("\n");
             builder.AppendFormat("Metada:{0}\n", this.Metadata.ToString());
             builder.AppendFormat("Value:{0}", Value);

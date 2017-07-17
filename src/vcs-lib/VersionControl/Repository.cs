@@ -38,6 +38,9 @@ namespace CollabEdit.VersionControl
 
         public RepositoryBranch<TValue, TMeta> CreateBranch(string name)
         {
+            if (string.IsNullOrEmpty(name)) throw new ArgumentException("Branch name may not be null or empty string.");
+            if (CurrentBranch.Head == null) throw new InvalidOperationException("Can't create new Branch from an empty one.");
+
             var branch = new RepositoryBranch<TValue, TMeta>(name, this, CurrentBranch.Head);
             _branches.Add(branch.Name, branch);
 
