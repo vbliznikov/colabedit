@@ -56,7 +56,76 @@ namespace CollabEdit.VersionControl.Tests
         [Test]
         public void RepositoryBranch_Test_Merge_EqualBranch()
         {
+            var repository = new Repository<int, string>();
+            var commit = repository.CurrentBranch.Commit(0, "initial value");
+            var secondBranch = repository.CreateBranch("second");
+            Assert.That(secondBranch.Head.Equals(commit), "After creation Branch should point to the parent Head");
 
+            var merge = secondBranch.MergeWith(repository.CurrentBranch);
+            Assert.That(merge != null);
+            Assert.That(merge.Equals(commit), "Merge op should return head before merge");
+        }
+
+        [Test]
+        public void RepositoryBranch_Test_Merge_SourceBehindTarget()
+        {
+            var repository = new Repository<int, string>();
+            var initialCommit = repository.CurrentBranch.Commit(0, "initial value");
+            var secondBranch = repository.CreateBranch("second");
+            Assert.That(secondBranch.Head.Equals(initialCommit), "After creation Branch should point to the parent Head");
+
+            secondBranch.Commit(1, "second commit");
+            var branchHead = secondBranch.Head;
+
+            var merge = secondBranch.MergeWith(repository.CurrentBranch);
+            Assert.That(merge != null);
+            Assert.That(merge.Equals(branchHead), "Merge op should return head of current branch");
+        }
+
+        [Test]
+        public void RepositoryBranch_Test_Merge_SourceAheadTarget()
+        {
+            var repository = new Repository<int, string>();
+            var masterBranch = repository.CurrentBranch;
+            var initialCommit = masterBranch.Commit(0, "initial value");
+            var secondBranch = repository.CreateBranch("second");
+            Assert.That(secondBranch.Head.Equals(initialCommit), "After creation Branch should point to the parent Head");
+
+            masterBranch.Commit(1, "second commit");
+            var masterHead = masterBranch.Head;
+
+            var merge = secondBranch.MergeWith(masterBranch);
+            Assert.That(merge != null);
+            Assert.That(merge.Equals(masterHead), "Merge op should return head of master branch");
+        }
+
+        [Test]
+        public void RepositoryBranch_Test_Merge_DeviatedBranches()
+        {
+            var repository = new Repository<int, string>();
+            var masterBranch = repository.CurrentBranch;
+            var initialCommit = masterBranch.Commit(0, "initial value");
+
+            var secondBranch = repository.CreateBranch("second");
+            Assert.That(secondBranch.Head.Equals(initialCommit), "After creation Branch should point to the parent Head");
+
+            for (int i = 1; i <= 10; i++)
+                masterBranch.Commit(i, i + " commit");
+            var masterHead = masterBranch.Head;
+
+            for (int i = 2; i <= 10; i += 2)
+                secondBranch.Commit(i, i + " branch commit");
+            var branchHead = secondBranch.Head;
+
+            var merge = secondBranch.MergeWith(masterBranch);
+            Assert.That(secondBranch.GetHistory().Count() == 7, "There should be 3 commits in second branch");
+
+            Assert.That(merge != null);
+            Assert.That(!merge.Equals(masterHead), "Merge op should return new commit");
+            Assert.That(!merge.Equals(branchHead), "Merge op should return new commit");
+
+            Assert.That(merge.Parents.First().Equals(branchHead), "Merge commit should have second branch head as a first parent");
+            Assert.That(merge.Parents.Last().Equals(masterHead), "Merge commit should have master branch head as a second parent");
         }
     }
 

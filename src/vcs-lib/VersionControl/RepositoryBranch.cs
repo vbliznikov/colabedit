@@ -50,7 +50,7 @@ namespace CollabEdit.VersionControl
             if (sourceBranch.Head == null) throw new ArgumentException("Source branch is empty");
             if (Head == null) throw new InvalidOperationException("Current branch is empty");
 
-            if (Head.Equals(sourceBranch)) return Head;
+            if (Head.Equals(sourceBranch.Head)) return Head;
             lock (syncRoot)
             {
                 var commonAncestor = FindCommonAcestor(Head, sourceBranch.Head);

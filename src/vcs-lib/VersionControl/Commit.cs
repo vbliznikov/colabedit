@@ -29,9 +29,10 @@ namespace CollabEdit.VersionControl
 
         override public int GetHashCode()
         {
-            int hashCode = Value.GetHashCode() ^ Metadata.GetHashCode();
-            // if (Previous != null)
-            //     hashCode ^= Previous.GetHashCode();
+            int hashCode = Value.GetHashCode();
+            if (Metadata != null)
+                hashCode ^= Metadata.GetHashCode();
+
             foreach (var parent in Parents)
                 hashCode ^= parent.GetHashCode();
             return hashCode;
