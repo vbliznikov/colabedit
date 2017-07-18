@@ -84,9 +84,12 @@ namespace CollabEdit.VersionControl
 
         protected Commit<TValue, TMeta> FindCommonAcestor(Commit<TValue, TMeta> left, Commit<TValue, TMeta> right)
         {
-            var trace = new HashSet<Commit<TValue, TMeta>>();
-            trace.Add(left);
-            trace.Add(right);
+            var commonNodeTrace = new HashSet<Commit<TValue, TMeta>>();
+            commonNodeTrace.Add(left);
+            commonNodeTrace.Add(right);
+
+            var leftBranchTrace = new HashSet<Commit<TValue, TMeta>>();
+            var rightBranchTrace = new HashSet<Commit<TValue, TMeta>>();
 
             Commit<TValue, TMeta> commonAncestor = null;
             var leftParents = new Queue<Commit<TValue, TMeta>>();
@@ -102,13 +105,13 @@ namespace CollabEdit.VersionControl
             {
                 if (leftParents.Count > 0)
                 {
-                    commonAncestor = MoveUp(trace, leftParents);
+                    commonAncestor = MoveUp(commonNodeTrace, leftBranchTrace, leftParents);
                     if (commonAncestor != null) break;
                 }
 
                 if (rightParents.Count > 0)
                 {
-                    commonAncestor = MoveUp(trace, rightParents);
+                    commonAncestor = MoveUp(commonNodeTrace, rightBranchTrace, rightParents);
                     if (commonAncestor != null) break;
                 }
 
@@ -119,14 +122,19 @@ namespace CollabEdit.VersionControl
             return commonAncestor;
         }
 
-        protected Commit<TValue, TMeta> MoveUp(ISet<Commit<TValue, TMeta>> trace, Queue<Commit<TValue, TMeta>> parentNodes)
+        protected Commit<TValue, TMeta> MoveUp(ISet<Commit<TValue, TMeta>> commonTrace, ISet<Commit<TValue, TMeta>> branchTrace, Queue<Commit<TValue, TMeta>> parentNodes)
         {
             var next = parentNodes.Dequeue();
-            if (trace.Contains(next)) return next;
+            if (commonTrace.Contains(next)) return next;
 
-            trace.Add(next);
-            foreach (var parent in next.Parents.Reverse())
+            commonTrace.Add(next);
+            foreach (var parent in next.Parents)
+            {
+                // Do not traverse the same parent twise from merge nodes
+                if (branchTrace.Contains(parent)) continue;
                 parentNodes.Enqueue(parent);
+                branchTrace.Add(parent);
+            }
 
             return null;
         }
