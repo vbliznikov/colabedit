@@ -8,6 +8,11 @@ namespace CollabEdit.VersionControl.Tests
     [TestFixture]
     public class TestRepositoryBranchInternals : RepositoryBranch<int, string>
     {
+        private Commit<int, string> CreateCommit(int value, string comment, params Commit<int, string>[] parents)
+        {
+            return new Commit<int, string>(value, comment, parents);
+        }
+
         [Test]
         public void Test_FindCommonAncestor_AfterMerge()
         {
@@ -16,19 +21,14 @@ namespace CollabEdit.VersionControl.Tests
             //.4/--->.3
             //        \.5
 
-            var root = new Commit<int, string>(1, "root");
-            var commit2 = new Commit<int, string>(2, "commit2", root);
-            var commit3 = new Commit<int, string>(2, "commit3", root);
-            var commit4 = new Commit<int, string>(3, "commit4", commit2, commit3);
-            var commit5 = new Commit<int, string>(3, "commit5", commit3);
+            var root = CreateCommit(1, "root");
+            var commit2 = CreateCommit(2, "commit2", root);
+            var commit3 = CreateCommit(2, "commit3", root);
+            var commit4 = CreateCommit(3, "commit4", commit2, commit3);
+            var commit5 = CreateCommit(3, "commit5", commit3);
 
             var lca = this.FindCommonAcestor(commit4, commit5);
             Assert.AreEqual(commit3, lca, "The LCA should be commit3");
-        }
-
-        private Commit<int, string> CreateCommit(int value, string comment, params Commit<int, string>[] parents)
-        {
-            return new Commit<int, string>(value, comment, parents);
         }
 
         [Test]
