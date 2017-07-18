@@ -89,14 +89,14 @@ namespace CollabEdit.VersionControl
             trace.Add(right);
 
             Commit<TValue, TMeta> commonAncestor = null;
-            var leftParents = new Stack<Commit<TValue, TMeta>>();
-            var rightParents = new Stack<Commit<TValue, TMeta>>();
+            var leftParents = new Queue<Commit<TValue, TMeta>>();
+            var rightParents = new Queue<Commit<TValue, TMeta>>();
 
-            foreach (var parent in left.Parents.Reverse())
-                leftParents.Push(parent);
+            foreach (var parent in left.Parents)
+                leftParents.Enqueue(parent);
 
-            foreach (var parent in right.Parents.Reverse())
-                rightParents.Push(parent);
+            foreach (var parent in right.Parents)
+                rightParents.Enqueue(parent);
 
             while (commonAncestor == null)
             {
@@ -119,14 +119,14 @@ namespace CollabEdit.VersionControl
             return commonAncestor;
         }
 
-        protected Commit<TValue, TMeta> MoveUp(ISet<Commit<TValue, TMeta>> trace, Stack<Commit<TValue, TMeta>> parentNodes)
+        protected Commit<TValue, TMeta> MoveUp(ISet<Commit<TValue, TMeta>> trace, Queue<Commit<TValue, TMeta>> parentNodes)
         {
-            var next = parentNodes.Pop();
+            var next = parentNodes.Dequeue();
             if (trace.Contains(next)) return next;
 
             trace.Add(next);
             foreach (var parent in next.Parents.Reverse())
-                parentNodes.Push(parent);
+                parentNodes.Enqueue(parent);
 
             return null;
         }
