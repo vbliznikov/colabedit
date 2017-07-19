@@ -9,6 +9,10 @@ namespace CollabEdit.VersionControl.Operations
         public IDictionary<TKey, TValue> Merge(IDictionary<TKey, TValue> origin, IDictionary<TKey, TValue> left,
             IDictionary<TKey, TValue> right, ConflictResolutionOptions options)
         {
+            if (origin == null) throw new ArgumentNullException(nameof(origin));
+            if (left == null) throw new ArgumentNullException(nameof(left));
+            if (right == null) throw new ArgumentException(nameof(right));
+
             // Empty dictionaries left and right
             if (left.Count == 0 && right.Count == 0)
                 return left;
