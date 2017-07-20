@@ -219,8 +219,8 @@ namespace nicTest {
     [Test()]
     public void patch_applyTest() {
       TestPatchOperations dmp = new TestPatchOperations();
-      dmp.Match_Distance = 1000;
-      dmp.Match_Threshold = 0.5f;
+      dmp.Match.Match_Distance = 1000;
+      dmp.Match.Match_Threshold = 0.5f;
       dmp.Patch_DeleteThreshold = 0.5f;
       List<Patch> patches;
       patches = dmp.patch_make("", "");
@@ -265,15 +265,15 @@ namespace nicTest {
       Assert.AreEqual("xabcy\tTrue\tTrue", resultStr, "patch_apply: Big delete, big change 2.");
       dmp.Patch_DeleteThreshold = 0.5f;
 
-      dmp.Match_Threshold = 0.0f;
-      dmp.Match_Distance = 0;
+      dmp.Match.Match_Threshold = 0.0f;
+      dmp.Match.Match_Distance = 0;
       patches = dmp.patch_make("abcdefghijklmnopqrstuvwxyz--------------------1234567890", "abcXXXXXXXXXXdefghijklmnopqrstuvwxyz--------------------1234567YYYYYYYYYY890");
       results = dmp.patch_apply(patches, "ABCDEFGHIJKLMNOPQRSTUVWXYZ--------------------1234567890");
       boolArray = (bool[])results[1];
       resultStr = results[0] + "\t" + boolArray[0] + "\t" + boolArray[1];
       Assert.AreEqual("ABCDEFGHIJKLMNOPQRSTUVWXYZ--------------------1234567YYYYYYYYYY890\tFalse\tTrue", resultStr, "patch_apply: Compensate for failed patch.");
-      dmp.Match_Threshold = 0.5f;
-      dmp.Match_Distance = 1000;
+      dmp.Match.Match_Threshold = 0.5f;
+      dmp.Match.Match_Distance = 1000;
 
       patches = dmp.patch_make("", "test");
       string patchStr = dmp.patch_toText(patches);

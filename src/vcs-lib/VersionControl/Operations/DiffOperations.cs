@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace DiffMatchPatch
 {
-    public class DiffOperations : MatchOperations
+    public class DiffOperations
     {
         /// <summary>
         /// Number of seconds to map a diff before giving up (0 for infinity). 

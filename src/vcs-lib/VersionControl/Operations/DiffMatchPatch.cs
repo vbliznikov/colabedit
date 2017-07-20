@@ -24,9 +24,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-// Seems to be Bug in Rider
-// ReSharper disable once RedundantUsingDirective
-using System.Net;
 
 namespace DiffMatchPatch {
   /// <summary>
@@ -52,10 +49,7 @@ namespace DiffMatchPatch {
     /// </summary>
     public short Patch_Margin = 4;
 
-
-    //  DIFF FUNCTIONS
-
-
+    protected MatchOperations Match = new MatchOperations();
 
     //  PATCH FUNCTIONS
 
@@ -76,7 +70,7 @@ namespace DiffMatchPatch {
       // different matches are found, increase the pattern length.
       while (text.IndexOf(pattern, StringComparison.Ordinal)
           != text.LastIndexOf(pattern, StringComparison.Ordinal)
-          && pattern.Length < Match_MaxBits - Patch_Margin - Patch_Margin) {
+          && pattern.Length < Match.Match_MaxBits - Patch_Margin - Patch_Margin) {
         padding += Patch_Margin;
         pattern = text.JavaSubstring(Math.Max(0, patch.start2 - padding),
             Math.Min(text.Length, patch.start2 + patch.length1 + padding));
@@ -288,22 +282,22 @@ namespace DiffMatchPatch {
         string text1 = diff_text1(aPatch.diffs);
         int start_loc;
         int end_loc = -1;
-        if (text1.Length > this.Match_MaxBits) {
+        if (text1.Length > Match.Match_MaxBits) {
           // patch_splitMax will only provide an oversized pattern
           // in the case of a monster delete.
-          start_loc = match_main(text,
-              text1.Substring(0, this.Match_MaxBits), expected_loc);
+          start_loc = Match.match_main(text,
+              text1.Substring(0, Match.Match_MaxBits), expected_loc);
           if (start_loc != -1) {
-            end_loc = match_main(text,
-                text1.Substring(text1.Length - this.Match_MaxBits),
-                expected_loc + text1.Length - this.Match_MaxBits);
+            end_loc = Match.match_main(text,
+                text1.Substring(text1.Length - Match.Match_MaxBits),
+                expected_loc + text1.Length - Match.Match_MaxBits);
             if (end_loc == -1 || start_loc >= end_loc) {
               // Can't find valid trailing context.  Drop this patch.
               start_loc = -1;
             }
           }
         } else {
-          start_loc = this.match_main(text, text1, expected_loc);
+          start_loc = Match.match_main(text, text1, expected_loc);
         }
         if (start_loc == -1) {
           // No match found.  :(
@@ -320,7 +314,7 @@ namespace DiffMatchPatch {
                 Math.Min(start_loc + text1.Length, text.Length));
           } else {
             text2 = text.JavaSubstring(start_loc,
-                Math.Min(end_loc + this.Match_MaxBits, text.Length));
+                Math.Min(end_loc + Match.Match_MaxBits, text.Length));
           }
           if (text1 == text2) {
             // Perfect match, just shove the Replacement text in.
@@ -330,7 +324,7 @@ namespace DiffMatchPatch {
             // Imperfect match.  Run a diff to get a framework of equivalent
             // indices.
             List<Diff> diffs = diff_main(text1, text2, false);
-            if (text1.Length > this.Match_MaxBits
+            if (text1.Length > Match.Match_MaxBits
                 && this.diff_levenshtein(diffs) / (float) text1.Length
                 > this.Patch_DeleteThreshold) {
               // The end points match, but the content is unacceptably bad.
@@ -433,7 +427,7 @@ namespace DiffMatchPatch {
     /// <remarks>Intended to be called only from within patch_apply.</remarks>
     /// <param name="patches">List of Patch objects.</param>
     public void patch_splitMax(List<Patch> patches) {
-      short patch_size = this.Match_MaxBits;
+      short patch_size = Match.Match_MaxBits;
       for (int x = 0; x < patches.Count; x++) {
         if (patches[x].length1 <= patch_size) {
           continue;
@@ -600,7 +594,7 @@ namespace DiffMatchPatch {
           }
           line = text[textPointer].Substring(1);
           line = line.Replace("+", "%2b");
-          line = Web​Utility.UrlDecode(line);
+          line = System.Net.WebUtility.UrlDecode(line);
           if (sign == '-') {
             // Deletion.
             patch.diffs.Add(new Diff(Operation.DELETE, line));
