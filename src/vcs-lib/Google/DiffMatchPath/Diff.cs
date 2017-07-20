@@ -19,6 +19,9 @@
  * http://code.google.com/p/google-diff-match-patch/
  */
 
+/* Minor refactoring (code split) for better readability and to match C# naming style
+*  Author: v.bliznikov@gmail.com
+*/
 using System;
 
 namespace DiffMatchPatch
@@ -30,14 +33,16 @@ namespace DiffMatchPatch
     /// {Diff(Operation.DELETE, "Hello"), Diff(Operation.INSERT, "Goodbye"), Diff(Operation.EQUAL, " world.")}
     /// Which means: delete "Hello", add "Goodbye" and keep " world." 
     /// </example>
-    public enum Operation {
+    public enum Operation
+    {
         DELETE, INSERT, EQUAL
     }
-    
+
     /// <summary>
     /// Class representing one diff operation.
     /// </summary>
-    public class Diff {
+    public class Diff
+    {
         public Operation operation;
         // One of: INSERT, DELETE or EQUAL.
         public string text;
@@ -48,7 +53,8 @@ namespace DiffMatchPatch
      * @param operation One of INSERT, DELETE or EQUAL.
      * @param text The text being applied.
      */
-        public Diff(Operation operation, string text) {
+        public Diff(Operation operation, string text)
+        {
             // Construct a diff with the specified operation and text.
             this.operation = operation;
             this.text = text;
@@ -58,7 +64,8 @@ namespace DiffMatchPatch
      * Display a human-readable version of this Diff.
      * @return text version.
      */
-        public override string ToString() {
+        public override string ToString()
+        {
             string prettyText = this.text.Replace('\n', '\u00b6');
             return "Diff(" + this.operation + ",\"" + prettyText + "\")";
         }
@@ -68,15 +75,18 @@ namespace DiffMatchPatch
      * @param d Another Diff to compare against.
      * @return true or false.
      */
-        public override bool Equals(Object obj) {
+        public override bool Equals(Object obj)
+        {
             // If parameter is null return false.
-            if (obj == null) {
+            if (obj == null)
+            {
                 return false;
             }
 
             // If parameter cannot be cast to Diff return false.
             Diff p = obj as Diff;
-            if ((System.Object)p == null) {
+            if ((System.Object)p == null)
+            {
                 return false;
             }
 
@@ -84,9 +94,11 @@ namespace DiffMatchPatch
             return p.operation == this.operation && p.text == this.text;
         }
 
-        public bool Equals(Diff obj) {
+        public bool Equals(Diff obj)
+        {
             // If parameter is null return false.
-            if (obj == null) {
+            if (obj == null)
+            {
                 return false;
             }
 
@@ -94,7 +106,8 @@ namespace DiffMatchPatch
             return obj.operation == this.operation && obj.text == this.text;
         }
 
-        public override int GetHashCode() {
+        public override int GetHashCode()
+        {
             return text.GetHashCode() ^ operation.GetHashCode();
         }
     }
