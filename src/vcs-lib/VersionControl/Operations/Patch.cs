@@ -22,9 +22,6 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-// Seems to be Bug in Rider
-// ReSharper disable once RedundantUsingDirective
-using System.Net;
 
 namespace DiffMatchPatch
 {
@@ -77,10 +74,10 @@ namespace DiffMatchPatch
                         break;
                 }
 
-                text.Append(Web​Utility.UrlEncode(aDiff.text).Replace('+', ' ')).Append("\n");
+                text.Append(System.Net.WebUtility.UrlEncode(aDiff.text).Replace('+', ' ')).Append("\n");
             }
 
-            return diff_match_patch.unescapeForEncodeUriCompatability(
+            return EscapingUtility.UnescapeForEncodeUsiCcompatability(
                 text.ToString());
         }
     }

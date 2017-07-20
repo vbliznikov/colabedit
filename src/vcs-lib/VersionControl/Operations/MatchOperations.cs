@@ -25,7 +25,7 @@ namespace DiffMatchPatch
         public int Match_Distance = 1000;
         
         // The number of bits in an int.
-        protected short Match_MaxBits = 32;
+        public short Match_MaxBits = 32;
 
         /// <summary>
         /// Locate the best instance of 'pattern' in 'text' near 'loc'.
