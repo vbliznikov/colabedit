@@ -29,56 +29,13 @@ using System.Text.RegularExpressions;
 using System.Net;
 
 namespace DiffMatchPatch {
-  
-  public interface IDiffOperations
-  {
-    List<Diff> diff_main(string text1, string text2);
-    List<Diff> diff_main(string text1, string text2, bool checklines);
-    
-    
-    void diff_cleanupSemantic(List<Diff> diffs);
-    void diff_cleanupSemanticLossless(List<Diff> diffs);
-    void diff_cleanupEfficiency(List<Diff> diffs);
-    void diff_cleanupMerge(List<Diff> diffs);
-    
-    int diff_xIndex(List<Diff> diffs, int loc);
-    
-    string diff_prettyHtml(List<Diff> diffs);
-    
-    string diff_text1(List<Diff> diffs);
-    string diff_text2(List<Diff> diffs);
-    
-    int diff_levenshtein(List<Diff> diffs);
-    
-    string diff_toDelta(List<Diff> diffs);
-    List<Diff> diff_fromDelta(string text1, string delta);
-  }
-
-  public interface IPatchOperations
-  {
-    List<Patch> patch_make(string text1, string text2);
-    List<Patch> patch_make(List<Diff> diffs);
-
-    List<Patch> patch_make(string text1, string text2, List<Diff> diffs);
-
-    List<Patch> patch_make(string text1, List<Diff> diffs);
-    List<Patch> patch_deepCopy(List<Patch> patches);
-    
-    Object[] patch_apply(List<Patch> patches, string text);
-    
-    string patch_addPadding(List<Patch> patches);
-    void patch_splitMax(List<Patch> patches);
-    
-    string patch_toText(List<Patch> patches);
-    List<Patch> patch_fromText(string textline);
-  }
-
   /// <summary>
   /// Class containing the diff, match and patch methods.
   /// Also Contains the behaviour settings.
   /// </summary>
   public class diff_match_patch : DiffOperations, IDiffOperations, IPatchOperations
   {
+    // Defaults.
     // Defaults.
     // Set these on your diff_match_patch instance to override the defaults.
 
@@ -136,7 +93,7 @@ namespace DiffMatchPatch {
     public List<Diff> diff_main(string text1, string text2, bool checklines) {
       // Set a deadline by which time the diff must be complete.
       DateTime deadline;
-      if (this.Diff_Timeout <= 0) {
+      if (Diff_Timeout <= 0) {
         deadline = DateTime.MaxValue;
       } else {
         deadline = DateTime.Now +
@@ -627,7 +584,7 @@ namespace DiffMatchPatch {
     /// and the common middle.  Or null if there was no match.
     /// </returns>
     protected string[] diff_halfMatch(string text1, string text2) {
-      if (this.Diff_Timeout <= 0) {
+      if (Diff_Timeout <= 0) {
         // Don't risk returning a non-optimal diff if we have unlimited time.
         return null;
       }
@@ -963,7 +920,7 @@ namespace DiffMatchPatch {
       bool post_del = false;
       while (pointer < diffs.Count) {
         if (diffs[pointer].operation == Operation.EQUAL) {  // Equality found.
-          if (diffs[pointer].text.Length < this.Diff_EditCost
+          if (diffs[pointer].text.Length < Diff_EditCost
               && (post_ins || post_del)) {
             // Candidate found.
             equalities.Push(pointer);
@@ -992,7 +949,7 @@ namespace DiffMatchPatch {
            */
           if ((lastequality.Length != 0)
               && ((pre_ins && pre_del && post_ins && post_del)
-              || ((lastequality.Length < this.Diff_EditCost / 2)
+              || ((lastequality.Length < Diff_EditCost / 2)
               && ((pre_ins ? 1 : 0) + (pre_del ? 1 : 0) + (post_ins ? 1 : 0)
               + (post_del ? 1 : 0)) == 3))) {
             // Duplicate record.
