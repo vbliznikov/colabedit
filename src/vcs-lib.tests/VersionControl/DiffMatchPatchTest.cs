@@ -126,7 +126,7 @@ namespace nicTest {
       patches = dmp.patch_make(text1, text2);
       Assert.AreEqual(expectedPatch, dmp.patch_toText(patches), "patch_make: Text1+Text2 inputs.");
 
-      List<Diff> diffs = dmp.diff_main(text1, text2, false);
+      List<Diff> diffs = dmp.DiffOps.diff_main(text1, text2, false);
       patches = dmp.patch_make(diffs);
       Assert.AreEqual(expectedPatch, dmp.patch_toText(patches), "patch_make: Diff input.");
 
