@@ -10,10 +10,31 @@ namespace DiffMatchPatch
     
     public class MatchOperations : IMatchOperations
     {
+        /// <summary>
+        /// At what point is no match declared (0.0 = perfection, 1.0 = very loose). 
+        /// </summary>
         public float Match_Threshold = 0.5f;
+        
+        /// <summary>
+        /// How far to search for a match (0 = exact location, 1000+ = broad match).
+        /// </summary>
+        /// <remarks>
+        /// A match this many characters away from the expected location will add 1.0 to the score 
+        /// (0.0 is a perfect match).
+        /// </remarks>
         public int Match_Distance = 1000;
+        
+        // The number of bits in an int.
         protected short Match_MaxBits = 32;
 
+        /// <summary>
+        /// Locate the best instance of 'pattern' in 'text' near 'loc'.
+        /// Returns -1 if no match found.
+        /// </summary>
+        /// <param name="text">The text to search.</param>
+        /// <param name="pattern">The pattern to search for.</param>
+        /// <param name="loc">The location to search around.</param>
+        /// <returns>Best match index or -1.</returns>
         public int match_main(string text, string pattern, int loc) {
             // Check for null inputs not needed since null can't be passed in C#.
 
@@ -34,6 +55,14 @@ namespace DiffMatchPatch
             }
         }
 
+        /// <summary>
+        /// Locate the best instance of 'pattern' in 'text' near 'loc' using the Bitap algorithm.  
+        /// Returns -1 if no match found.
+        /// </summary>
+        /// <param name="text">The text to search.</param>
+        /// <param name="pattern">The pattern to search for.</param>
+        /// <param name="loc">The location to search around.</param>
+        /// <returns>Best match index or -1.</returns>
         protected int match_bitap(string text, string pattern, int loc) {
             // assert (Match_MaxBits == 0 || pattern.Length <= Match_MaxBits)
             //    : "Pattern too long for this application.";
@@ -131,6 +160,14 @@ namespace DiffMatchPatch
             return best_loc;
         }
 
+        /// <summary>
+        /// Compute and return the score for a match with e errors and x location.
+        /// </summary>
+        /// <param name="e">Number of errors in match.</param>
+        /// <param name="x">Location of match.</param>
+        /// <param name="loc">Expected location of match.</param>
+        /// <param name="pattern">Pattern being sought.</param>
+        /// <returns>Overall score for match (0.0 = good, 1.0 = bad).</returns>
         private double match_bitapScore(int e, int x, int loc, string pattern) {
             float accuracy = (float)e / pattern.Length;
             int proximity = Math.Abs(loc - x);
@@ -141,6 +178,11 @@ namespace DiffMatchPatch
             return accuracy + (proximity / (float) Match_Distance);
         }
 
+        /// <summary>
+        /// Initialise the alphabet for the Bitap algorithm.
+        /// </summary>
+        /// <param name="pattern">The text to encode.</param>
+        /// <returns>Hash of character locations.</returns>
         protected Dictionary<char, int> match_alphabet(string pattern) {
             Dictionary<char, int> s = new Dictionary<char, int>();
             char[] char_pattern = pattern.ToCharArray();
