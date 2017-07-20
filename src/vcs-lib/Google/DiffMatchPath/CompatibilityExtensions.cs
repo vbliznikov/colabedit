@@ -25,7 +25,7 @@
 
 using System.Collections.Generic;
 
-namespace DiffMatchPatch
+namespace Google.DiffMatchPatch
 {
     internal static class CompatibilityExtensions
     {

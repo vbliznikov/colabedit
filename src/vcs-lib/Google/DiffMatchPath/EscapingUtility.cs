@@ -23,7 +23,7 @@
 *  Author: v.bliznikov@gmail.com
 */
 
-namespace DiffMatchPatch
+namespace Google.DiffMatchPatch
 {
     public static class EscapingUtility
     {

@@ -26,10 +26,9 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using DiffMatchPatch;
 using NUnit.Framework;
 
-namespace nicTest
+namespace Google.DiffMatchPatch.Tests
 {
     public class TestDiffOperations : DiffOperations
     {

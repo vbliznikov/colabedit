@@ -23,12 +23,11 @@
 *  Author: v.bliznikov@gmail.com
 */
 
-using DiffMatchPatch;
 using System.Collections.Generic;
 using System;
 using NUnit.Framework;
 
-namespace nicTest
+namespace Google.DiffMatchPatch.Tests
 {
     [TestFixture()]
     public class TestPatchOperations : PatchOperations

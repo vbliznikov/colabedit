@@ -24,10 +24,9 @@
 */
 
 using System.Collections.Generic;
-using DiffMatchPatch;
 using NUnit.Framework;
 
-namespace nicTest
+namespace Google.DiffMatchPatch.Tests
 {
     [TestFixture]
     public class TestMatchOperations : MatchOperations

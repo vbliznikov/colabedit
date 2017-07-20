@@ -29,7 +29,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace DiffMatchPatch
+namespace Google.DiffMatchPatch
 {
     /// <summary>
     /// Class containing the diff, match and patch methods.

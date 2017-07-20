@@ -26,7 +26,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace DiffMatchPatch
+namespace Google.DiffMatchPatch
 {
     public class MatchOperations
     {

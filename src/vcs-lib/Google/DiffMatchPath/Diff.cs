@@ -24,7 +24,7 @@
 */
 using System;
 
-namespace DiffMatchPatch
+namespace Google.DiffMatchPatch
 {
     /// <summary>
     /// The data structure representing a diff is a List of Diff objects.

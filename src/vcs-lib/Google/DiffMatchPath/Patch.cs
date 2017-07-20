@@ -27,7 +27,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace DiffMatchPatch
+namespace Google.DiffMatchPatch
 {
     ///<summary>
     /// Class representing one patch operation.
