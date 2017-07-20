@@ -3,12 +3,7 @@ using System.Collections.Generic;
 
 namespace DiffMatchPatch
 {
-    public interface IMatchOperations
-    {
-        int match_main(string text, string pattern, int loc);
-    }
-    
-    public class MatchOperations : IMatchOperations
+   public class MatchOperations
     {
         /// <summary>
         /// At what point is no match declared (0.0 = perfection, 1.0 = very loose). 
@@ -35,7 +30,7 @@ namespace DiffMatchPatch
         /// <param name="pattern">The pattern to search for.</param>
         /// <param name="loc">The location to search around.</param>
         /// <returns>Best match index or -1.</returns>
-        public int match_main(string text, string pattern, int loc) {
+        public int Match(string text, string pattern, int loc) {
             // Check for null inputs not needed since null can't be passed in C#.
 
             loc = Math.Max(0, Math.Min(loc, text.Length));
@@ -51,7 +46,7 @@ namespace DiffMatchPatch
                 return loc;
             } else {
                 // Do a fuzzy compare.
-                return match_bitap(text, pattern, loc);
+                return MatchBitap(text, pattern, loc);
             }
         }
 
@@ -63,26 +58,26 @@ namespace DiffMatchPatch
         /// <param name="pattern">The pattern to search for.</param>
         /// <param name="loc">The location to search around.</param>
         /// <returns>Best match index or -1.</returns>
-        protected int match_bitap(string text, string pattern, int loc) {
+        protected int MatchBitap(string text, string pattern, int loc) {
             // assert (Match_MaxBits == 0 || pattern.Length <= Match_MaxBits)
             //    : "Pattern too long for this application.";
 
             // Initialise the alphabet.
-            Dictionary<char, int> s = match_alphabet(pattern);
+            Dictionary<char, int> s = MatchAlphabet(pattern);
 
             // Highest score beyond which we give up.
             double score_threshold = Match_Threshold;
             // Is there a nearby exact match? (speedup)
             int best_loc = text.IndexOf(pattern, loc, StringComparison.Ordinal);
             if (best_loc != -1) {
-                score_threshold = Math.Min(match_bitapScore(0, best_loc, loc,
+                score_threshold = Math.Min(MatchBitapScore(0, best_loc, loc,
                     pattern), score_threshold);
                 // What about in the other direction? (speedup)
                 best_loc = text.LastIndexOf(pattern,
                     Math.Min(loc + pattern.Length, text.Length),
                     StringComparison.Ordinal);
                 if (best_loc != -1) {
-                    score_threshold = Math.Min(match_bitapScore(0, best_loc, loc,
+                    score_threshold = Math.Min(MatchBitapScore(0, best_loc, loc,
                         pattern), score_threshold);
                 }
             }
@@ -102,7 +97,7 @@ namespace DiffMatchPatch
                 bin_min = 0;
                 bin_mid = bin_max;
                 while (bin_min < bin_mid) {
-                    if (match_bitapScore(d, loc + bin_mid, loc, pattern)
+                    if (MatchBitapScore(d, loc + bin_mid, loc, pattern)
                         <= score_threshold) {
                         bin_min = bin_mid;
                     } else {
@@ -134,7 +129,7 @@ namespace DiffMatchPatch
                                 | (((last_rd[j + 1] | last_rd[j]) << 1) | 1) | last_rd[j + 1];
                     }
                     if ((rd[j] & matchmask) != 0) {
-                        double score = match_bitapScore(d, j - 1, loc, pattern);
+                        double score = MatchBitapScore(d, j - 1, loc, pattern);
                         // This match will almost certainly be better than any existing
                         // match.  But check anyway.
                         if (score <= score_threshold) {
@@ -151,7 +146,7 @@ namespace DiffMatchPatch
                         }
                     }
                 }
-                if (match_bitapScore(d + 1, loc, loc, pattern) > score_threshold) {
+                if (MatchBitapScore(d + 1, loc, loc, pattern) > score_threshold) {
                     // No hope for a (better) match at greater error levels.
                     break;
                 }
@@ -168,7 +163,7 @@ namespace DiffMatchPatch
         /// <param name="loc">Expected location of match.</param>
         /// <param name="pattern">Pattern being sought.</param>
         /// <returns>Overall score for match (0.0 = good, 1.0 = bad).</returns>
-        private double match_bitapScore(int e, int x, int loc, string pattern) {
+        private double MatchBitapScore(int e, int x, int loc, string pattern) {
             float accuracy = (float)e / pattern.Length;
             int proximity = Math.Abs(loc - x);
             if (Match_Distance == 0) {
@@ -183,7 +178,7 @@ namespace DiffMatchPatch
         /// </summary>
         /// <param name="pattern">The text to encode.</param>
         /// <returns>Hash of character locations.</returns>
-        protected Dictionary<char, int> match_alphabet(string pattern) {
+        protected Dictionary<char, int> MatchAlphabet(string pattern) {
             Dictionary<char, int> s = new Dictionary<char, int>();
             char[] char_pattern = pattern.ToCharArray();
             foreach (char c in char_pattern) {

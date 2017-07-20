@@ -30,7 +30,7 @@ namespace DiffMatchPatch {
   /// Class containing the diff, match and patch methods.
   /// Also Contains the behaviour settings.
   /// </summary>
-  public class PatchOperations : IPatchOperations
+  public class PatchOperations
   {
     // Defaults.
     // Defaults.
@@ -60,7 +60,7 @@ namespace DiffMatchPatch {
     /// </summary>
     /// <param name="patch">The patch to grow.</param>
     /// <param name="text">Source text.</param>
-    protected void patch_addContext(Patch patch, string text) {
+    protected void PatchAaddContext(Patch patch, string text) {
       if (text.Length == 0) {
         return;
       }
@@ -107,15 +107,15 @@ namespace DiffMatchPatch {
     /// <param name="text1">Old text.</param>
     /// <param name="text2">New text.</param>
     /// <returns>List of Patch objects.</returns>
-    public List<Patch> patch_make(string text1, string text2) {
+    public List<Patch> PatchMake(string text1, string text2) {
       // Check for null inputs not needed since null can't be passed in C#.
       // No diffs provided, comAdde our own.
-      List<Diff> diffs = DiffOps.diff_main(text1, text2, true);
+      List<Diff> diffs = DiffOps.GetDifference(text1, text2, true);
       if (diffs.Count > 2) {
-        DiffOps.diff_cleanupSemantic(diffs);
-        DiffOps.diff_cleanupEfficiency(diffs);
+        DiffOps.CleanupSemantic(diffs);
+        DiffOps.CleanupEfficiency(diffs);
       }
-      return patch_make(text1, diffs);
+      return PatchMake(text1, diffs);
     }
 
     /// <summary>
@@ -124,11 +124,11 @@ namespace DiffMatchPatch {
     /// </summary>
     /// <param name="diffs">Array of Diff objects for text1 to text2.</param>
     /// <returns>List of Patch objects.</returns>
-    public List<Patch> patch_make(List<Diff> diffs) {
+    public List<Patch> PatchMake(List<Diff> diffs) {
       // Check for null inputs not needed since null can't be passed in C#.
       // No origin string provided, comAdde our own.
-      string text1 = DiffOps.diff_text1(diffs);
-      return patch_make(text1, diffs);
+      string text1 = DiffOps.GetText1(diffs);
+      return PatchMake(text1, diffs);
     }
 
     /// <summary>
@@ -140,9 +140,9 @@ namespace DiffMatchPatch {
     /// <param name="text2">Ignored.</param>
     /// <param name="diffs">Array of Diff objects for text1 to text2.</param>
     /// <returns>List of Patch objects.</returns>
-    public List<Patch> patch_make(string text1, string text2,
+    public List<Patch> PatchMake(string text1, string text2,
         List<Diff> diffs) {
-      return patch_make(text1, diffs);
+      return PatchMake(text1, diffs);
     }
 
     /// <summary>
@@ -152,7 +152,7 @@ namespace DiffMatchPatch {
     /// <param name="text1">Old text.</param>
     /// <param name="diffs">Array of Diff objects for text1 to text2.</param>
     /// <returns>List of Patch objects.</returns>
-    public List<Patch> patch_make(string text1, List<Diff> diffs) {
+    public List<Patch> PatchMake(string text1, List<Diff> diffs) {
       // Check for null inputs not needed since null can't be passed in C#.
       List<Patch> patches = new List<Patch>();
       if (diffs.Count == 0) {
@@ -197,7 +197,7 @@ namespace DiffMatchPatch {
             if (aDiff.text.Length >= 2 * Patch_Margin) {
               // Time for a new patch.
               if (patch.diffs.Count != 0) {
-                patch_addContext(patch, prepatch_text);
+                PatchAaddContext(patch, prepatch_text);
                 patches.Add(patch);
                 patch = new Patch();
                 // Unlike Unidiff, our patch lists have a rolling context.
@@ -221,7 +221,7 @@ namespace DiffMatchPatch {
       }
       // Pick up the leftover patch if not empty.
       if (patch.diffs.Count != 0) {
-        patch_addContext(patch, prepatch_text);
+        PatchAaddContext(patch, prepatch_text);
         patches.Add(patch);
       }
 
@@ -233,7 +233,7 @@ namespace DiffMatchPatch {
     /// </summary>
     /// <param name="patches">Array of Patch objects.</param>
     /// <returns>Array of Patch objects.</returns>
-    public List<Patch> patch_deepCopy(List<Patch> patches) {
+    public List<Patch> PatchDeepCopy(List<Patch> patches) {
       List<Patch> patchesCopy = new List<Patch>();
       foreach (Patch aPatch in patches) {
         Patch patchCopy = new Patch();
@@ -259,17 +259,17 @@ namespace DiffMatchPatch {
     /// <returns>
     /// Two element Object array, containing the new text and an array of bool values.
     /// </returns>
-    public Object[] patch_apply(List<Patch> patches, string text) {
+    public Object[] PatchApply(List<Patch> patches, string text) {
       if (patches.Count == 0) {
         return new Object[] { text, new bool[0] };
       }
 
       // Deep copy the patches so that no changes are made to originals.
-      patches = patch_deepCopy(patches);
+      patches = PatchDeepCopy(patches);
 
-      string nullPadding = this.patch_addPadding(patches);
+      string nullPadding = this.PatchAddPadding(patches);
       text = nullPadding + text + nullPadding;
-      patch_splitMax(patches);
+      PatchSplitMax(patches);
 
       int x = 0;
       // delta keeps track of the offset between the expected and actual
@@ -280,16 +280,16 @@ namespace DiffMatchPatch {
       bool[] results = new bool[patches.Count];
       foreach (Patch aPatch in patches) {
         int expected_loc = aPatch.start2 + delta;
-        string text1 = DiffOps.diff_text1(aPatch.diffs);
+        string text1 = DiffOps.GetText1(aPatch.diffs);
         int start_loc;
         int end_loc = -1;
         if (text1.Length > Match.Match_MaxBits) {
           // patch_splitMax will only provide an oversized pattern
           // in the case of a monster delete.
-          start_loc = Match.match_main(text,
+          start_loc = Match.Match(text,
               text1.Substring(0, Match.Match_MaxBits), expected_loc);
           if (start_loc != -1) {
-            end_loc = Match.match_main(text,
+            end_loc = Match.Match(text,
                 text1.Substring(text1.Length - Match.Match_MaxBits),
                 expected_loc + text1.Length - Match.Match_MaxBits);
             if (end_loc == -1 || start_loc >= end_loc) {
@@ -298,7 +298,7 @@ namespace DiffMatchPatch {
             }
           }
         } else {
-          start_loc = Match.match_main(text, text1, expected_loc);
+          start_loc = Match.Match(text, text1, expected_loc);
         }
         if (start_loc == -1) {
           // No match found.  :(
@@ -319,29 +319,29 @@ namespace DiffMatchPatch {
           }
           if (text1 == text2) {
             // Perfect match, just shove the Replacement text in.
-            text = text.Substring(0, start_loc) + DiffOps.diff_text2(aPatch.diffs)
+            text = text.Substring(0, start_loc) + DiffOps.GetText2(aPatch.diffs)
                 + text.Substring(start_loc + text1.Length);
           } else {
             // Imperfect match.  Run a diff to get a framework of equivalent
             // indices.
-            List<Diff> diffs = DiffOps.diff_main(text1, text2, false);
+            List<Diff> diffs = DiffOps.GetDifference(text1, text2, false);
             if (text1.Length > Match.Match_MaxBits
-                && DiffOps.diff_levenshtein(diffs) / (float) text1.Length
+                && DiffOps.ToLevenshteinDistance(diffs) / (float) text1.Length
                 > this.Patch_DeleteThreshold) {
               // The end points match, but the content is unacceptably bad.
               results[x] = false;
             } else {
-              DiffOps.diff_cleanupSemanticLossless(diffs);
+              DiffOps.CleanupSemanticLossless(diffs);
               int index1 = 0;
               foreach (Diff aDiff in aPatch.diffs) {
                 if (aDiff.operation != Operation.EQUAL) {
-                  int index2 = DiffOps.diff_xIndex(diffs, index1);
+                  int index2 = DiffOps.FindIndex(diffs, index1);
                   if (aDiff.operation == Operation.INSERT) {
                     // Insertion
                     text = text.Insert(start_loc + index2, aDiff.text);
                   } else if (aDiff.operation == Operation.DELETE) {
                     // Deletion
-                    text = text.Remove(start_loc + index2, DiffOps.diff_xIndex(diffs,
+                    text = text.Remove(start_loc + index2, DiffOps.FindIndex(diffs,
                         index1 + aDiff.text.Length) - index2);
                   }
                 }
@@ -366,7 +366,7 @@ namespace DiffMatchPatch {
     /// <remarks>Intended to be called only from within patch_apply.</remarks>
     /// <param name="patches">Array of Patch objects.</param>
     /// <returns>The padding string added to each side.</returns>
-    public string patch_addPadding(List<Patch> patches) {
+    public string PatchAddPadding(List<Patch> patches) {
       short paddingLength = this.Patch_Margin;
       string nullPadding = string.Empty;
       for (short x = 1; x <= paddingLength; x++) {
@@ -427,7 +427,7 @@ namespace DiffMatchPatch {
     /// </summary>
     /// <remarks>Intended to be called only from within patch_apply.</remarks>
     /// <param name="patches">List of Patch objects.</param>
-    public void patch_splitMax(List<Patch> patches) {
+    public void PatchSplitMax(List<Patch> patches) {
       short patch_size = Match.Match_MaxBits;
       for (int x = 0; x < patches.Count; x++) {
         if (patches[x].length1 <= patch_size) {
@@ -491,17 +491,17 @@ namespace DiffMatchPatch {
             }
           }
           // Compute the head context for the next patch.
-          precontext = DiffOps.diff_text2(patch.diffs);
+          precontext = DiffOps.GetText2(patch.diffs);
           precontext = precontext.Substring(Math.Max(0,
               precontext.Length - this.Patch_Margin));
 
           string postcontext = null;
           // Append the end context for this patch.
-          if (DiffOps.diff_text1(bigpatch.diffs).Length > Patch_Margin) {
-            postcontext = DiffOps.diff_text1(bigpatch.diffs)
+          if (DiffOps.GetText1(bigpatch.diffs).Length > Patch_Margin) {
+            postcontext = DiffOps.GetText1(bigpatch.diffs)
                 .Substring(0, Patch_Margin);
           } else {
-            postcontext = DiffOps.diff_text1(bigpatch.diffs);
+            postcontext = DiffOps.GetText1(bigpatch.diffs);
           }
 
           if (postcontext.Length != 0) {
@@ -527,7 +527,7 @@ namespace DiffMatchPatch {
     /// </summary>
     /// <param name="patches">List of Patch objects.</param>
     /// <returns>Text representation of patches.</returns>
-    public string patch_toText(List<Patch> patches) {
+    public string PatchToText(List<Patch> patches) {
       StringBuilder text = new StringBuilder();
       foreach (Patch aPatch in patches) {
         text.Append(aPatch);
@@ -541,7 +541,7 @@ namespace DiffMatchPatch {
     /// <param name="textline">Text representation of patches.</param>
     /// <returns>List of Patch objects.</returns>
     /// <exception cref="ArgumentException">If invalid input.</exception>
-    public List<Patch> patch_fromText(string textline) {
+    public List<Patch> PatchFromText(string textline) {
       List<Patch> patches = new List<Patch>();
       if (textline.Length == 0) {
         return patches;
