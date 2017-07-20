@@ -33,7 +33,7 @@ namespace DiffMatchPatch {
   /// Class containing the diff, match and patch methods.
   /// Also Contains the behaviour settings.
   /// </summary>
-  public class diff_match_patch : DiffOperations, IPatchOperations
+  public class PatchOperations : DiffOperations, IPatchOperations
   {
     // Defaults.
     // Defaults.
