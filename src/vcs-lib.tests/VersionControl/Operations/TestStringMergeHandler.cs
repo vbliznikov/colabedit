@@ -19,8 +19,21 @@ namespace CollabEdit.VersionControl.Operations.Tests
             var lDiff = diffOps.GetDifference(origin, left);
             var rDiff = diffOps.GetDifference(origin, right);
 
-            lDiff.Align(rDiff);
-            Assert.That(lDiff.Count, Is.EqualTo(rDiff.Count));
+            var stub = new MergeScriptStub(lDiff, rDiff);
+            stub.Align();
+            Assert.That(stub.ALeft.Count, Is.EqualTo(stub.ARight.Count));
+        }
+
+        private class MergeScriptStub : MergeScript
+        {
+            public MergeScriptStub(List<Diff> left, List<Diff> right) : base(left, right) { }
+
+            public new List<Diff> ALeft => base.ALeft;
+            public new List<Diff> ARight => base.ARight;
+            public void Align()
+            {
+                base.AlignScripts();
+            }
         }
     }
 }

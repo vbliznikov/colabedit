@@ -32,8 +32,8 @@ namespace CollabEdit.VersionControl.Operations
         public static string ToResultText(this List<Diff> source)
         {
             System.Text.StringBuilder sb = new System.Text.StringBuilder();
-            var parts = source.Where(diff => diff.operation != Operation.DELETE)
-                foreach (var part in parts)
+            var parts = source.Where(diff => diff.operation != Operation.DELETE);
+            foreach (var part in parts)
                 sb.Append(part.text);
 
             return sb.ToString();
