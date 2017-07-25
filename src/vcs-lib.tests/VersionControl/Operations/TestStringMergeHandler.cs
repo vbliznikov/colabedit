@@ -10,30 +10,24 @@ namespace CollabEdit.VersionControl.Operations.Tests
     [TestFixture]
     public class TestStringMergeHandler
     {
-        [TestCase("Fox jumps", "Brown fox jumps", "Fox jumps over frog")]
-        [TestCase("Fox jumps over frog", "Brown fox jumps over frog", "Fox jumps")]
-        [TestCase("Fox jumps", "Brown fox jumps", "Blue fox jumps")]
-        public void TestCompareDiffs(string origin, string left, string right)
+        [TestCase("Fox jumps",
+            "Brown fox jumps",
+                  "Fox jumps over frog",
+            "Brown fox jumps over frog")]
+        [TestCase("Fox jumps over frog",
+            "Brown fox jumps over frog",
+                  "Fox jumps",
+            "Brown fox jumps")]
+        [TestCase("Fox jumps",
+            "Brown fox jumps",
+             "Blue fox jumps",
+            "Brown fox jumps")]
+        [TestCase("Fox eats the frog", "Pig grunt", "Pig grunt", "Pig grunt")]
+        public void TestCompareDiffs(string origin, string left, string right, string expected)
         {
-            var diffOps = new DiffOperations();
-            var lDiff = diffOps.GetDifference(origin, left);
-            var rDiff = diffOps.GetDifference(origin, right);
-
-            var stub = new MergeScriptStub(lDiff, rDiff);
-            stub.Align();
-            Assert.That(stub.ALeft.Count, Is.EqualTo(stub.ARight.Count));
-        }
-
-        private class MergeScriptStub : MergeScript
-        {
-            public MergeScriptStub(List<Diff> left, List<Diff> right) : base(left, right) { }
-
-            public new List<Diff> ALeft => base.ALeft;
-            public new List<Diff> ARight => base.ARight;
-            public void Align()
-            {
-                base.AlignScripts();
-            }
+            var mergeHandler = new StringMergeHandler();
+            var mergeResult = mergeHandler.Merge(origin, left, right, ConflictResolutionOptions.RaiseException);
+            Assert.That(mergeResult, Is.EqualTo(expected));
         }
     }
 }

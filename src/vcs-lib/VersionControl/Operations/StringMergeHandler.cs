@@ -5,10 +5,14 @@ namespace CollabEdit.VersionControl.Operations
 {
     public class StringMergeHandler : MergeHandler<string>
     {
-        public StringMergeHandler() : base(StringComparer.Ordinal) { }
+        private IMergeHandler<string> _strategy;
+        public StringMergeHandler() : base(StringComparer.Ordinal)
+        {
+            _strategy = new CharBasedMerge();
+        }
         protected override string DoMerge(string origin, string left, string right, ConflictResolutionOptions options)
         {
-            throw new NotImplementedException();
+            return _strategy.Merge(origin, left, right, options);
         }
     }
 }
