@@ -115,7 +115,6 @@ namespace CollabEdit.Controllers.Test
             Assert.That(files.Any((item) => !item.IsFile), Is.False);
             // Objects are sorted asc by name
             Assert.That(files[0], Is.LessThan(files[filesCount - 1]));
-            // Assert.True(((IComparable)files[0]).CompareTo(files[filesCount - 1]) < 0);
         }
 
         [TestCase("home")]

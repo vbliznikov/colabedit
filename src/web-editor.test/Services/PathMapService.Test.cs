@@ -51,10 +51,6 @@ namespace CollabEdit.Test
 
             Assert.That(() => new PathMapService(Options.Create(badPathConfig)), Throws.ArgumentException);
             Assert.That(() => new PathMapService(Options.Create(badVirtualRootConfig)), Throws.ArgumentException);
-            // Assert.Throws<ArgumentException>("options",
-            //     () => new PathMapService(Options.Create(badPathConfig)));
-            // Assert.Throws<ArgumentException>("options",
-            //     () => new PathMapService(Options.Create(badVirtualRootConfig)));
         }
 
         [Test]
