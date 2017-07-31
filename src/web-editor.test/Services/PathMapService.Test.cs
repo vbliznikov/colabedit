@@ -1,5 +1,5 @@
 using System;
-using Xunit;
+using NUnit.Framework;
 using System.IO;
 using Microsoft.Extensions.Options;
 
@@ -8,6 +8,7 @@ using CollabEdit.IO;
 
 namespace CollabEdit.Test
 {
+    [TestFixture]
     public class PathMapTest
     {
 
@@ -27,34 +28,36 @@ namespace CollabEdit.Test
             return new PathMapService(Options.Create(config));
         }
 
-        [Fact]
+        [Test]
         public void CtorWithNullPathArgument_ShouldThrowsArgumentException()
         {
-            Assert.Throws<ArgumentNullException>("options", () => new PathMapService(null));
+            Assert.That(() => new PathMapService(null), Throws.ArgumentNullException);
         }
 
-        [Fact]
+        [Test]
         public void CtorWithNullConfigValue_ShouldUSeDefaultOptions()
         {
             var defaultOptions = new ExplorerOptions();
             var pathMap = new PathMapService(Options.Create<ExplorerOptions>(null));
-            Assert.Equal(Path.GetFullPath(defaultOptions.EditorRoot), pathMap.PhysicalRoot);
-            Assert.Equal(defaultOptions.VirtualRoot, pathMap.VirtualRoot);
+            Assert.That(pathMap.PhysicalRoot, Is.EqualTo(Path.GetFullPath(defaultOptions.EditorRoot)));
+            Assert.That(pathMap.VirtualRoot, Is.EqualTo(defaultOptions.VirtualRoot));
         }
 
-        [Fact]
+        [Test]
         public void CtorWithExplicitNullConfigParams_ShouldTrhowException()
         {
             var badPathConfig = new ExplorerOptions { EditorRoot = "" };
             var badVirtualRootConfig = new ExplorerOptions { VirtualRoot = "" };
 
-            Assert.Throws<ArgumentException>("options",
-                () => new PathMapService(Options.Create(badPathConfig)));
-            Assert.Throws<ArgumentException>("options",
-                () => new PathMapService(Options.Create(badVirtualRootConfig)));
+            Assert.That(() => new PathMapService(Options.Create(badPathConfig)), Throws.ArgumentException);
+            Assert.That(() => new PathMapService(Options.Create(badVirtualRootConfig)), Throws.ArgumentException);
+            // Assert.Throws<ArgumentException>("options",
+            //     () => new PathMapService(Options.Create(badPathConfig)));
+            // Assert.Throws<ArgumentException>("options",
+            //     () => new PathMapService(Options.Create(badVirtualRootConfig)));
         }
 
-        [Fact]
+        [Test]
         public void Ctor_ShouldCreateEdiorRoot_IfNotExists()
         {
             var rootPath = FilePath.Combine(Directory.GetCurrentDirectory(), "../../../editor-root1");
@@ -68,39 +71,39 @@ namespace CollabEdit.Test
             };
             GetPathMapService(config);
 
-            Assert.True(Directory.Exists(rootPath));
+            Assert.That(Directory.Exists(rootPath));
             Directory.Delete(rootPath);
         }
 
-        [Fact]
+        [Test]
         public void CtorWithRootedPathConfig_ShouldPreservePath()
         {
             var path = "/home";
             var pathMap = GetPathMapService(path);
 
-            Assert.Equal(path, pathMap.PhysicalRoot);
+            Assert.That(pathMap.PhysicalRoot, Is.EqualTo(path));
         }
 
-        [Fact]
+        [Test]
         public void CtorwithRelativePathConfig_ShouldExpand()
         {
             var path = "./home";
             var pathMap = GetPathMapService(path);
 
-            Assert.Equal(Path.GetFullPath(path), pathMap.PhysicalRoot);
+            Assert.That(pathMap.PhysicalRoot, Is.EqualTo(Path.GetFullPath(path)));
         }
 
-        [Fact]
+        [Test]
         public void ToLocalPath_ShouldMapHomeToRoot()
         {
             var vPath = "home";
             var rootPath = "/root";
 
             var pathMap = GetPathMapService(rootPath, vPath);
-            Assert.Equal(rootPath, pathMap.ToLocalPath(vPath));
+            Assert.That(pathMap.ToLocalPath(vPath), Is.EqualTo(rootPath));
         }
 
-        [Fact]
+        [Test]
         public void ToLocalPath_ShouldMapSubsequentParts()
         {
             var rootPath = "/root";
@@ -109,10 +112,10 @@ namespace CollabEdit.Test
 
             var pathMap = GetPathMapService(rootPath); //new PathMapService(rootPath);
 
-            Assert.Equal(expectedPath, pathMap.ToLocalPath(vPath));
+            Assert.That(pathMap.ToLocalPath(vPath), Is.EqualTo(expectedPath));
         }
 
-        [Fact]
+        [Test]
         public void ToLocalPath_ShouldMapPath_NotStartingWithHome()
         {
             var rootPath = "/root";
@@ -121,10 +124,10 @@ namespace CollabEdit.Test
 
             var pathMap = GetPathMapService(rootPath); //new PathMapService(rootPath);
 
-            Assert.Equal(expectedPath, pathMap.ToLocalPath(vPath));
+            Assert.That(pathMap.ToLocalPath(vPath), Is.EqualTo(expectedPath));
         }
 
-        [Fact]
+        [Test]
         public void ToVirtualPath_ShouldMapRootToHome()
         {
             var rootPath = "/root";
@@ -133,10 +136,10 @@ namespace CollabEdit.Test
 
             var pathMap = GetPathMapService(rootPath); //new PathMapService(rootPath);
 
-            Assert.Equal(expectedPath, pathMap.ToVirtulPath(pPath));
+            Assert.That(pathMap.ToVirtulPath(pPath), Is.EqualTo(expectedPath));
         }
 
-        [Fact]
+        [Test]
         public void ToVirtulPath_ShoulTrimRoot()
         {
             var rootPath = "/root";
@@ -146,7 +149,7 @@ namespace CollabEdit.Test
 
             var pathMap = GetPathMapService(rootPath); //new PathMapService(rootPath);
 
-            Assert.Equal(expectedPath, pathMap.ToVirtulPath(pPath));
+            Assert.That(pathMap.ToVirtulPath(pPath), Is.EqualTo(expectedPath));
         }
     }
 }
