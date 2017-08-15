@@ -1,7 +1,7 @@
 
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router'
-import { Observable } from 'rxjs';
+import { Observable } from 'rxjs/Observable';
 import "rxjs/add/operator/map";
 import "rxjs/add/operator/switchMap";
 
@@ -29,7 +29,7 @@ export class ExplorerHomeComponent implements OnInit {
         private router: Router, private activeRoute: ActivatedRoute, private toastr: ToastrService) { }
 
     ngOnInit() {
-        console.log('Explorer::Init');
+        console.debug('Explorer::Init');
         this.fileSystemEntry$ = this.pathMapService.getFsEntryFromUrl();
         this.fileSystemEntry$
             .switchMap((value) => {
@@ -43,7 +43,7 @@ export class ExplorerHomeComponent implements OnInit {
     }
 
     private onActivateFsEntry(entry: FileSystemInfo) {
-        console.log(`ExplorerHome::onActivate(${entry})`)
+        console.debug(`ExplorerHome::onActivate(${entry})`)
 
         if (entry.isFile) {
             // Open in Editor
@@ -64,20 +64,25 @@ export class ExplorerHomeComponent implements OnInit {
 
     }
 
-    private onNewFsEntry(request: ItemActionRequest<FileSystemInfo>) {
-        console.log(`ExplorerHome::onNewEntry ${request.item}`)
-        let fullPath = this.currentPath.path.concat(request.item.name);
-        let newItem = new FileSystemInfo(fullPath, request.item.isFile);
+    private onNewFsEntry(newItemRequest: ItemActionRequest<FileSystemInfo>) {
+        console.debug(`ExplorerHome::onNewFsEntry ${newItemRequest.item}`)
+
+        let fullPath = this.currentPath.path.concat(newItemRequest.item.name);
+        let newItem = new FileSystemInfo(fullPath, newItemRequest.item.isFile);
 
         this.explorerService.createFileSystemObject(newItem)
             .subscribe(item => {
-                request.item = item;
-                request.complete();
+                newItemRequest.item = item;
+                newItemRequest.complete();
+
+                let msg = newItemRequest.item.isFile ? 'File' : 'Folder';
+                msg += ` '${newItemRequest.item.name}' created successfully.`;
+                this.toastr.success(msg);
             });
     }
 
     private onItemsDelete(request: MultiActionRequest<FileSystemInfo>) {
-        console.log(`ExplorerHome::onItemsDelte ${request.requestItems.length}`);
+        console.debug(`ExplorerHome::onItemsDelte ${request.requestItems.length}`);
         var fsEntries = request.requestItems.map(value => value.item);
 
         this.explorerService.deleteFileSystemObjects(this.currentPath.path, fsEntries)
@@ -115,7 +120,8 @@ export class ExplorerHomeComponent implements OnInit {
     }
 
     private getBreadCrumbs(fsInfo: FileSystemInfo): Link[] {
-        console.log(`'ExplorerHome:' getBreadCrumbs()`);
+        console.debug(`'ExplorerHome:' getBreadCrumbs()`);
+
         const breabcrumbs: Link[] = [];
         let path = this.basePath;
         const lastFolderPath = fsInfo.isFile ? fsInfo.parent.path.parts : fsInfo.path.parts

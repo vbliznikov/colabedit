@@ -23,22 +23,23 @@ export class ExplorerDataService {
 
         return this.http.get(url, { headers: this.acceptJsonHeader })
             .map(response => response.json() as FileSystemInfo[])
-            .catch((err) => this.handleError(err));
-    }
-
-    private handleError(err) {
-        console.error(err);
-        this.toastr.error(err);
-        return Observable.of();
+            .catch((err) => {
+                return this.handleError<FileSystemInfo[]>(err);
+            });
     }
 
     public folderExists(folder: FileSystemInfo): Observable<boolean> {
         const url = `${this.apiBasePath}/folder/${folder.path.toString()}`;
 
         return this.http.get(url, { headers: this.acceptJsonHeader })
-            .map(response => Observable.of(true))
+            .map(response => true)
             .catch((err) => {
-                return Observable.of(false);
+                if (err instanceof Response) {
+                    const response = err as Response;
+                    if (response.status == 404)
+                        return Observable.of(false);
+                }
+                return Observable.of<boolean>();
             });
     }
 
@@ -47,18 +48,18 @@ export class ExplorerDataService {
 
         return this.http.get(url, { headers: this.acceptTextHeader })
             .map(response => response.text())
-            .catch((err) => this.handleError(err));
+            .catch((err) => this.handleError<string>(err));
     }
 
     public createFileSystemObject(fsEntry: FileSystemInfo): Observable<FileSystemInfo> {
         const url = fsEntry.isFile
             ? `${this.apiBasePath}/file/${fsEntry.parent.path.toString()}`
             : `${this.apiBasePath}/folder/${fsEntry.parent.path.toString()}`;
-
         const body = `name=${fsEntry.name}`;
+
         return this.http.post(url, body, { headers: this.contentTypeFormUrlEncodedHeader })
             .map(response => response.json() as FileSystemInfo)
-            .catch((err) => this.handleError(err));
+            .catch((err) => this.handleError<FileSystemInfo>(err));
     }
 
     public deleteFileSystemObjects(parentPath: PathInfo, entries: FileSystemInfo[]): Observable<ServerActionResponse<FileSystemInfo>[]> {
@@ -67,6 +68,11 @@ export class ExplorerDataService {
 
         return this.http.delete(url, { body: body, headers: this.contentTypeJsonHeader })
             .map(response => response.json() as ServerActionResponse<FileSystemInfo>[])
-            .catch(err => this.handleError(err));
+            .catch(err => this.handleError<ServerActionResponse<FileSystemInfo>[]>(err));
+    }
+
+    private handleError<T>(err): Observable<T> {
+        console.error(err);
+        return Observable.of<T>();
     }
 }
